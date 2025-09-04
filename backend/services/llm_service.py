@@ -77,11 +77,12 @@ class GhassanLLMService:
                 system_message=self.system_message
             ).with_model(provider, model)
             
-            # إعداد الرسالة مع نتائج البحث
+            # إعداد الرسالة مع نتائج البحث والتحقق من الدقة
             enhanced_message = self._prepare_message_with_search(user_message, search_results)
+            final_message = self._add_accuracy_instructions(enhanced_message)
             
             # إنشاء كائن UserMessage
-            user_msg = UserMessage(text=enhanced_message)
+            user_msg = UserMessage(text=final_message)
             
             # إرسال الرسالة والحصول على الرد
             response = await chat.send_message(user_msg)
