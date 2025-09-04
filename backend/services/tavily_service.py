@@ -41,42 +41,45 @@ class TavilyAdvancedSearchService:
         max_results: int = 5,
         include_domains: List[str] = None
     ) -> Dict[str, Any]:
-        """البحث المتقدم في الأدب العُماني باستخدام Tavily"""
+        """البحث المتقدم في المقابلات والمقالات الأدبية العُمانية المنشورة"""
         
         try:
-            # تحسين استعلام البحث للأدب العُماني
+            # تحسين استعلام البحث للمقابلات والمقالات
             enhanced_query = self._enhance_query_for_omani_literature(query)
             
-            # البحث باستخدام Tavily
+            # بحث مخصص للمحتوى الصحفي والأكاديمي المنشور
             search_response = self.client.search(
                 query=enhanced_query,
                 search_depth="advanced",  # بحث عميق
-                max_results=max_results,
+                max_results=max_results * 2,  # ضاعف النتائج للتصفية
                 include_answer=True,
-                include_domains=include_domains or self._get_priority_domains()
+                include_domains=include_domains or self._get_journalism_domains(),
+                exclude_domains=["facebook.com", "twitter.com", "instagram.com"],  # تجنب وسائل التواصل
+                include_raw_content=True,
+                max_tokens=8000  # محتوى أطول للمقالات
             )
             
-            # معالجة وتصفية النتائج
-            processed_results = self._process_tavily_results(search_response, query)
+            # تصفية وترتيب النتائج للتركيز على المحتوى الصحفي
+            filtered_results = self._filter_for_journalism_content(search_response, query)
             
             return {
                 'query': query,
                 'enhanced_query': enhanced_query,
-                'results': processed_results,
-                'total_found': len(processed_results),
-                'search_engine': 'tavily_advanced',
+                'results': filtered_results,
+                'total_found': len(filtered_results),
+                'search_engine': 'tavily_journalism_focused',
                 'answer_summary': search_response.get('answer', ''),
-                'search_depth': 'advanced'
+                'search_type': 'articles_and_interviews'
             }
             
         except Exception as e:
-            logger.error(f"خطأ في بحث Tavily: {e}")
+            logger.error(f"خطأ في بحث Tavily المحسن: {e}")
             return {
                 'query': query,
                 'results': [],
                 'total_found': 0,
                 'error': str(e),
-                'search_engine': 'tavily_error'
+                'search_engine': 'tavily_journalism_error'
             }
     
     def _enhance_query_for_omani_literature(self, query: str) -> str:
