@@ -72,12 +72,23 @@ class GhassanLLMService:
             if not session_id:
                 session_id = str(uuid.uuid4())
             
-            # إعداد الـ chat client
-            provider = "anthropic" if use_claude else "openai"
-            model = "claude-3-7-sonnet-20250219" if use_claude else "gpt-4o"
+            # اختيار المفتاح والنموذج المناسب
+            if use_claude and self.anthropic_key:
+                # استخدام Claude الخاص للتحليل الأدبي المتقدم
+                api_key = self.anthropic_key
+                provider = "anthropic"
+                model = "claude-3-5-sonnet-20241022"  # أحدث نموذج Claude
+                logger.info(f"استخدام Claude الخاص للتحليل الأدبي: {user_message[:50]}...")
+            else:
+                # استخدام Emergent للاستفسارات العامة
+                api_key = self.emergent_key
+                provider = "openai"
+                model = "gpt-4o"
+                logger.info(f"استخدام GPT-4o للاستفسارات العامة: {user_message[:50]}...")
             
+            # إعداد الـ chat client
             chat = LlmChat(
-                api_key=self.api_key,
+                api_key=api_key,
                 session_id=session_id,
                 system_message=self.system_message
             ).with_model(provider, model)
@@ -95,7 +106,7 @@ class GhassanLLMService:
             return {
                 'text': response,
                 'session_id': session_id,
-                'model_used': f"{provider}:{model}",
+                'model_used': f"{provider}:{model}" + ("(خاص)" if use_claude and self.anthropic_key else ""),
                 'has_search_results': bool(search_results),
                 'search_results_count': len(search_results) if search_results else 0
             }
