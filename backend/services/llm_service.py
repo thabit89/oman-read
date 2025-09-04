@@ -110,31 +110,88 @@ class GhassanLLMService:
         user_message: str, 
         search_results: List[Dict[str, Any]] = None
     ) -> str:
-        """إعداد الرسالة مع دمج نتائج البحث"""
+        """إعداد الرسالة مع دمج نتائج البحث والتحقق من الموثوقية"""
         if not search_results:
-            return user_message
+            return user_message + "\n\n" + self._add_analytical_framework(user_message)
         
-        # تجهيز المعلومات من البحث
-        search_context = "\n--- معلومات إضافية من البحث عبر الإنترنت ---\n"
+        # تجهيز المعلومات من البحث مع تقييم الموثوقية
+        search_context = "\n--- معلومات من مصادر موثوقة ---\n"
         
         for i, result in enumerate(search_results, 1):
+            reliability_note = ""
+            if result.get('reliability_warning'):
+                reliability_note = f" (تنبيه: {result['reliability_warning']})"
+            
             search_context += f"""
-{i}. {result.get('title', 'بلا عنوان')}
-المصدر: {result.get('source', 'غير محدد')}
-المحتوى: {result.get('content', '')[:300]}...
-{'الرابط: ' + result.get('url', '') if result.get('url') else ''}
+{i}. {result.get('title', 'بلا عنوان')}{reliability_note}
+المصدر: {result.get('source', 'غير محدد')} - نوع: {result.get('type', 'عام')}
+المحتوى: {result.get('content', '')[:200]}...
+درجة الموثوقية: {result.get('final_score', 0.5):.1f}/1.0
 """
         
-        search_context += "\n--- نهاية المعلومات الإضافية ---\n"
+        search_context += "\n--- نهاية المعلومات ---\n"
+        
+        # إضافة التوجيهات النقدية والنحوية
+        analytical_framework = self._add_analytical_framework(user_message)
         
         # دمج الرسالة مع السياق
-        enhanced_message = f"""السؤال الأصلي: {user_message}
+        enhanced_message = f"""السؤال: {user_message}
 
 {search_context}
 
-استخدم هذه المعلومات لتقديم إجابة شاملة ومفصلة. ادمج المعلومات بطريقة طبيعية دون ذكر صريح للبحث إلا إذا كان مفيداً للسياق."""
+{analytical_framework}
+
+تعليمات مهمة:
+- استخدم هذه المعلومات بحذر، خاصة تلك ذات الموثوقية المنخفضة
+- إذا تضاربت المصادر، اذكر ذلك صراحة  
+- إذا كانت المعلومات غير كافية، اعترف بذلك
+- ركز على التحليل الأدبي والنحوي العميق
+- استخدم النظريات النقدية المناسبة"""
         
         return enhanced_message
+    
+    def _add_analytical_framework(self, user_message: str) -> str:
+        """إضافة إطار تحليلي حسب نوع السؤال"""
+        analytical_context = ""
+        
+        # تحديد نوع الاستفسار
+        if any(word in user_message for word in ['تحليل', 'نقد', 'دراسة']):
+            analytical_context += """
+إطار التحليل المطلوب:
+• استخدم النظريات النقدية المناسبة (البنيوية، التفكيكية، النقد الثقافي)
+• حلل البنية اللغوية والنحوية للنص
+• اربط العمل بالسياق التاريخي والثقافي العُماني
+• اعتمد على منهجية نقدية واضحة
+"""
+        
+        elif any(word in user_message for word in ['شعر', 'قصيدة', 'بيت', 'أبيات']):
+            analytical_context += """
+تحليل شعري مطلوب:
+• حلل البحر الشعري والقافية
+• اشرح الصور البلاغية والاستعارات
+• حدد التيار الشعري (كلاسيكي، حداثي، معاصر)
+• اربط بالمدرسة الشعرية العُمانية
+"""
+        
+        elif any(word in user_message for word in ['نحو', 'إعراب', 'قواعد']):
+            analytical_context += """
+تحليل نحوي مطلوب:
+• اعرب الكلمات والجمل بدقة
+• اشرح القواعد النحوية المطبقة
+• حدد الوظائف النحوية للعناصر
+• اذكر المراجع النحوية المعتمدة
+"""
+        
+        elif any(word in user_message for word in ['تاريخ', 'نشأة', 'تطور']):
+            analytical_context += """
+سياق تاريخي مطلوب:
+• اربط بالأحداث التاريخية العُمانية
+• اذكر المراحل الزمنية بدقة
+• حدد التأثيرات الثقافية والاجتماعية
+• اعتمد على المصادر التاريخية الموثوقة
+"""
+        
+        return analytical_context
     
     def _should_use_claude(self, user_message: str) -> bool:
         """تحديد متى نستخدم Claude بدلاً من GPT"""
