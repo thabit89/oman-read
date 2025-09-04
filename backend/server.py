@@ -73,11 +73,17 @@ async def root():
 
 @api_router.post("/chat/message", response_model=ChatResponse)
 async def send_message(request: ChatMessageRequest):
-    """إرسال رسالة لغسان والحصول على رد ذكي"""
+    """إرسال رسالة لغسان والحصول على رد ذكي مع فحص الموثوقية"""
     try:
         result = await chat_service.process_user_message(
             message_text=request.message,
             session_id=request.session_id
+        )
+        
+        # فحص موثوقية الرد
+        verification_result = await information_verifier.verify_response(
+            response=result['text'],
+            user_query=request.message
         )
         
         return ChatResponse(
@@ -86,11 +92,51 @@ async def send_message(request: ChatMessageRequest):
             session_id=result['session_id'],
             timestamp=result['timestamp'].isoformat() if hasattr(result['timestamp'], 'isoformat') else str(result['timestamp']),
             has_web_search=result.get('has_web_search', False),
-            model_used=result.get('model_used')
+            model_used=result.get('model_used'),
+            reliability_score=verification_result['overall_score'],
+            confidence_level=verification_result['confidence_level']
         )
     except Exception as e:
         logging.error(f"خطأ في إرسال الرسالة: {e}")
         raise HTTPException(status_code=500, detail=f"خطأ في معالجة الرسالة: {str(e)}")
+
+@api_router.post("/knowledge/add-source")
+async def add_literature_source(request: AddSourceRequest):
+    """إضافة مصدر أدبي جديد لقاعدة المعرفة"""
+    try:
+        result = await knowledge_base.add_literature_source(
+            title=request.title,
+            content=request.content,
+            source_type=request.source_type,
+            author=request.author,
+            publication_date=request.publication_date,
+            reliability_score=request.reliability_score or 0.8,
+            tags=request.tags or []
+        )
+        return result
+    except Exception as e:
+        logging.error(f"خطأ في إضافة المصدر: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في إضافة المصدر: {str(e)}")
+
+@api_router.get("/knowledge/stats")
+async def get_knowledge_stats():
+    """إحصائيات قاعدة المعرفة"""
+    try:
+        stats = await knowledge_base.get_knowledge_stats()
+        return stats
+    except Exception as e:
+        logging.error(f"خطأ في جلب الإحصائيات: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في جلب الإحصائيات: {str(e)}")
+
+@api_router.get("/knowledge/search")
+async def search_knowledge(query: str, limit: int = 5):
+    """البحث في قاعدة المعرفة"""
+    try:
+        results = await knowledge_base.search_knowledge(query, limit)
+        return {"results": results}
+    except Exception as e:
+        logging.error(f"خطأ في البحث: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في البحث: {str(e)}")
 
 @api_router.get("/chat/history/{session_id}")
 async def get_chat_history(session_id: str, limit: int = 50):
