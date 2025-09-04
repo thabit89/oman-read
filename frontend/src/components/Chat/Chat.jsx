@@ -159,7 +159,7 @@ export const Chat = () => {
               {/* Avatar with Glow Effect - Enhanced */}
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full blur animate-pulse"></div>
-                <Avatar className="relative h-18 w-18 ring-2 ring-emerald-200 shadow-lg hover:scale-105 transition-all duration-200">
+                <Avatar className="relative h-14 w-14 ring-2 ring-emerald-200 shadow-lg hover:scale-105 transition-all duration-200">
                   <AvatarImage 
                     src={`${process.env.REACT_APP_BACKEND_URL}/uploads/ghassan-avatar.png`}
                     alt="غسان - المساعد الأدبي العُماني" 
