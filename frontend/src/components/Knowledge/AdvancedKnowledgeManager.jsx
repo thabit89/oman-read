@@ -58,17 +58,21 @@ export const AdvancedKnowledgeManager = () => {
   const handleAutoCollect = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/rag/collect-sources`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/collect/simple`, {
         method: 'POST'
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const result = await response.json();
       
       if (result.collection_completed) {
-        setMessage(`تم جمع ${result.sources_collected} مصدر ومعالجة ${result.sources_processed} منها`);
+        setMessage(`تم جمع ${result.total_sources_found} مصدر من ${result.authors_processed} مؤلف بنجاح!`);
         setMessageType('success');
-        fetchStats(); // تحديث الإحصائيات
       } else {
-        setMessage(`خطأ في الجمع: ${result.error}`);
+        setMessage(`خطأ في الجمع: ${result.error || 'خطأ غير معروف'}`);
         setMessageType('error');
       }
     } catch (error) {
