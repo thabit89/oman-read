@@ -177,11 +177,6 @@ export const AudioBooks = () => {
           ))}
         </div>
 
-        {/* Back to Chat */}
-        <div className="text-center mt-8">
-          <Button asChild variant="outline" className="bg-white/80 backdrop-blur-sm">
-            <a href="/">العودة للدردشة مع غسان</a>
-          </Button>
         </div>
       </div>
     </div>
