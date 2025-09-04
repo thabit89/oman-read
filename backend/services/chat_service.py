@@ -46,6 +46,10 @@ class ChatService:
             needs_search = self._message_needs_search(message_text)
             search_results = []
             
+            # **تحديد المرحلة التعليمية للطالب**
+            student_level = self._detect_student_level(message_text, conversation_context)
+            curriculum_context = self._get_curriculum_context(message_text, student_level)
+            
             # البحث في قاعدة المعرفة المحلية أولاً
             local_knowledge = self._search_local_knowledge_base(message_text)
             
