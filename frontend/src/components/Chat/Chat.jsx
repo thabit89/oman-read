@@ -265,8 +265,7 @@ export const Chat = () => {
                   }`}
                 >
                   <div 
-                    className="text-sm leading-relaxed"
-                    style={{ direction: 'rtl', textAlign: 'right' }}
+                    className="message-content arabic-text text-sm leading-relaxed"
                     dangerouslySetInnerHTML={{ 
                       __html: formatMessageText(message.text)
                     }}
