@@ -10,6 +10,7 @@ export const Chat = () => {
   const [messages, setMessages] = useState(mockChatData.messages);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const scrollAreaRef = useRef(null);
   const messagesEndRef = useRef(null);
 
