@@ -45,7 +45,11 @@ class ChatService:
             needs_search = self._message_needs_search(message_text)
             search_results = []
             
-            if needs_search:
+            # البحث في قاعدة المعرفة المحلية أولاً
+            local_knowledge = self._search_local_knowledge_base(message_text)
+            
+            # تحديد إذا كان يحتاج بحث خارجي
+            if needs_search and not local_knowledge:
                 logger.info(f"رسالة تحتاج بحث متقدم بـ Tavily: {message_text}")
                 
                 # استخدام Tavily للبحث المتقدم
@@ -53,6 +57,16 @@ class ChatService:
                 
                 # تحويل نتائج Tavily لصيغة موحدة
                 search_results = self._convert_tavily_to_standard_format(tavily_results)
+            else:
+                search_results = []
+                if local_knowledge:
+                    # تحويل المعرفة المحلية لصيغة search_results
+                    search_results = [{
+                        'title': f"معلومات من قاعدة المعرفة: {local_knowledge['source']}",
+                        'content': local_knowledge['content'],
+                        'source': 'قاعدة المعرفة المحلية',
+                        'reliability_score': local_knowledge.get('reliability', 0.95)
+                    }]
             
             # تحديد إذا كان يحتاج تحليل أدبي متقدم
             needs_advanced_analysis = self._needs_advanced_literary_analysis(message_text)
