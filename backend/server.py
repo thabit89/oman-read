@@ -67,14 +67,11 @@ class ChatResponse(BaseModel):
     reliability_score: Optional[float] = None
     confidence_level: Optional[str] = None
 
-class AddSourceRequest(BaseModel):
-    title: str
-    content: str
-    source_type: str  # book, article, poem, biography
-    author: Optional[str] = None
-    publication_date: Optional[str] = None
-    reliability_score: Optional[float] = 0.8
-    tags: Optional[List[str]] = None
+class ContactRequest(BaseModel):
+    name: str
+    email: str
+    subject: str
+    message: str
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
@@ -110,23 +107,31 @@ async def send_message(request: ChatMessageRequest):
         logging.error(f"خطأ في إرسال الرسالة: {e}")
         raise HTTPException(status_code=500, detail=f"خطأ في معالجة الرسالة: {str(e)}")
 
-@api_router.post("/knowledge/add-source")
-async def add_literature_source(request: AddSourceRequest):
-    """إضافة مصدر أدبي جديد لقاعدة المعرفة"""
+@api_router.post("/contact")
+async def submit_contact_form(request: ContactRequest):
+    """إرسال نموذج الاتصال"""
     try:
-        result = await knowledge_base.add_literature_source(
-            title=request.title,
-            content=request.content,
-            source_type=request.source_type,
-            author=request.author,
-            publication_date=request.publication_date,
-            reliability_score=request.reliability_score or 0.8,
-            tags=request.tags or []
-        )
-        return result
+        # حفظ رسالة الاتصال في قاعدة البيانات
+        contact_data = {
+            'contact_id': str(uuid.uuid4()),
+            'name': request.name,
+            'email': request.email,
+            'subject': request.subject,
+            'message': request.message,
+            'submitted_at': datetime.utcnow(),
+            'status': 'new'
+        }
+        
+        await db.contact_messages.insert_one(contact_data)
+        
+        return {
+            'success': True,
+            'message': 'تم إرسال رسالتك بنجاح',
+            'contact_id': contact_data['contact_id']
+        }
     except Exception as e:
-        logging.error(f"خطأ في إضافة المصدر: {e}")
-        raise HTTPException(status_code=500, detail=f"خطأ في إضافة المصدر: {str(e)}")
+        logging.error(f"خطأ في إرسال رسالة الاتصال: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في إرسال الرسالة: {str(e)}")
 
 @api_router.get("/knowledge/stats")
 async def get_knowledge_stats():
