@@ -265,7 +265,7 @@ export const Chat = () => {
           </div>
           <Button 
             onClick={handleSendMessage}
-            disabled={!newMessage.trim() || isTyping || isSearching}
+            disabled={!newMessage.trim() || isTyping || isSearching || !isConnected || !sessionId}
             className="h-12 w-12 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg transition-all duration-200 rounded-xl"
           >
             <Send className="h-5 w-5" />
