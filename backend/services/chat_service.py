@@ -48,9 +48,14 @@ class ChatService:
             needs_advanced_analysis = self._needs_advanced_literary_analysis(message_text)
             use_claude = self._should_use_claude_analysis(message_text)
             
-            # استخدام النظام المتقدم LangChain + FAISS
+            # استخدام النظام المتقدم للرد
             logger.info(f"استخدام النظام المتقدم للرد: {message_text[:50]}...")
-            llm_response = await advanced_ghassan_service.answer_with_advanced_rag(message_text)
+            llm_response = await ghassan_llm_service.generate_response_with_search(
+                message_text, 
+                search_results=search_results,
+                session_id=session_id,
+                use_claude=use_claude
+            )
             
             # حفظ رد غسان
             ghassan_message = await self._save_message(
