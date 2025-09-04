@@ -62,7 +62,7 @@ export const Chat = () => {
   }, []);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !sessionId || !isConnected) return;
 
     const userMessage = {
       id: Date.now(),
@@ -72,44 +72,63 @@ export const Chat = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const messageText = newMessage;
     setNewMessage('');
     
-    // Check if message might need web search
-    const needsSearch = newMessage.includes('أخبرني عن') || 
-                       newMessage.includes('معلومات عن') ||
-                       newMessage.includes('من هو') ||
-                       newMessage.includes('ما هي') ||
-                       newMessage.includes('بحث') ||
-                       newMessage.includes('اعثر على');
+    // التحقق من الحاجة للبحث
+    const needsSearch = messageText.includes('أخبرني عن') || 
+                       messageText.includes('معلومات عن') ||
+                       messageText.includes('من هو') ||
+                       messageText.includes('ما هي') ||
+                       messageText.includes('بحث') ||
+                       messageText.includes('اعثر على');
 
     if (needsSearch) {
       setIsSearching(true);
-      setTimeout(() => {
-        setIsSearching(false);
-        setIsTyping(true);
-      }, 2000); // Show searching for 2 seconds
     } else {
       setIsTyping(true);
     }
 
-    // Simulate AI response
-    setTimeout(() => {
-      const responses = [
-        'أهلاً وسهلاً! دعني أبحث لك في مصادر الأدب العُماني الموثوقة... لقد وجدت معلومات قيمة حول هذا الموضوع. الأدب العُماني غني بالتراث والإبداع المعاصر.',
-        'بحثت عبر الإنترنت في المصادر الأدبية العُمانية، وإليك ما وجدت: هذا موضوع مثير للاهتمام في الأدب العُماني!',
-        'استخدمت قدراتي البحثية للعثور على معلومات دقيقة حول استفسارك من مصادر موثوقة في الأدب العُماني.',
-      ];
+    try {
+      // إرسال الرسالة للـ backend
+      const response = await ChatService.sendMessage(messageText, sessionId);
       
-      const aiResponse = {
+      if (response.success) {
+        const aiResponse = {
+          id: response.data.message_id,
+          text: response.data.text,
+          sender: 'ghassan',
+          timestamp: response.data.timestamp,
+          hasWebSearch: response.data.has_web_search,
+          modelUsed: response.data.model_used
+        };
+        
+        setMessages(prev => [...prev, aiResponse]);
+      } else {
+        // رسالة خطأ
+        const errorMessage = {
+          id: Date.now() + 1,
+          text: 'عذراً، حدث خطأ في معالجة رسالتك. أرجو المحاولة مرة أخرى.',
+          sender: 'ghassan',
+          timestamp: new Date().toISOString(),
+          hasWebSearch: false
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
+    } catch (error) {
+      console.error('خطأ في إرسال الرسالة:', error);
+      const errorMessage = {
         id: Date.now() + 1,
-        text: responses[Math.floor(Math.random() * responses.length)],
+        text: 'عذراً، لا أستطيع الاتصال بالخادم حالياً. أرجو المحاولة لاحقاً.',
         sender: 'ghassan',
         timestamp: new Date().toISOString(),
-        hasWebSearch: needsSearch
+        hasWebSearch: false
       };
-      setMessages(prev => [...prev, aiResponse]);
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsSearching(false);
       setIsTyping(false);
-    }, needsSearch ? 4000 : 1500);
+    }
   };
 
   const handleKeyPress = (e) => {
