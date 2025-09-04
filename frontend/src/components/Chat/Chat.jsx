@@ -161,7 +161,7 @@ export const Chat = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full blur animate-pulse"></div>
                 <Avatar className="relative h-18 w-18 ring-2 ring-emerald-200 shadow-lg hover:scale-105 transition-all duration-200">
                   <AvatarImage 
-                    src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=150&h=150&fit=crop&crop=face&auto=format&q=80"
+                    src={`${process.env.REACT_APP_BACKEND_URL}/uploads/ghassan-avatar.png`}
                     alt="غسان - المساعد الأدبي العُماني" 
                     className="object-cover"
                   />
