@@ -1,6 +1,7 @@
 import React from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { EnhancedChat } from "./components/Chat/EnhancedChat";
 import { Chat } from "./components/Chat/Chat";
 import { KnowledgeManager } from "./components/Knowledge/KnowledgeManager";
 import { AdvancedKnowledgeManager } from "./components/Knowledge/AdvancedKnowledgeManager";
@@ -10,7 +11,8 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Chat />} />
+          <Route path="/" element={<EnhancedChat />} />
+          <Route path="/simple" element={<Chat />} />
           <Route path="/knowledge" element={<KnowledgeManager />} />
           <Route path="/advanced" element={<AdvancedKnowledgeManager />} />
         </Routes>
