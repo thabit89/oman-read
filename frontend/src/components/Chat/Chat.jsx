@@ -24,6 +24,43 @@ export const Chat = () => {
     scrollToBottom();
   }, [messages]);
 
+  // إنشاء جلسة جديدة عند التحميل
+  useEffect(() => {
+    const initializeChat = async () => {
+      try {
+        // اختبار الاتصال
+        const connectionTest = await ChatService.testConnection();
+        if (connectionTest.success) {
+          setIsConnected(true);
+          
+          // إنشاء جلسة جديدة
+          const sessionResult = await ChatService.createNewSession();
+          if (sessionResult.success) {
+            setSessionId(sessionResult.data.session_id);
+            
+            // إضافة رسالة ترحيبية
+            const welcomeMessage = {
+              id: 'welcome_' + Date.now(),
+              text: 'أهلاً وسهلاً! أنا غسان، مساعدك الأدبي العُماني الذكي. كيف يمكنني مساعدتك اليوم في عالم الأدب العُماني؟',
+              sender: 'ghassan',
+              timestamp: new Date().toISOString(),
+              hasWebSearch: false
+            };
+            setMessages([welcomeMessage]);
+          }
+        } else {
+          setIsConnected(false);
+          console.error('فشل في الاتصال بالخادم');
+        }
+      } catch (error) {
+        console.error('خطأ في تهيئة الدردشة:', error);
+        setIsConnected(false);
+      }
+    };
+
+    initializeChat();
+  }, []);
+
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
