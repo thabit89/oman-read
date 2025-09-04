@@ -206,6 +206,26 @@ class ChatService:
         
         return context
     
+    def _convert_tavily_to_standard_format(self, tavily_results: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """تحويل نتائج Tavily إلى الصيغة الموحدة"""
+        if not tavily_results.get('results'):
+            return []
+        
+        standard_results = []
+        for result in tavily_results['results']:
+            standard_result = {
+                'title': result.get('title', ''),
+                'content': result.get('content', ''),
+                'url': result.get('url', ''),
+                'source': f"Tavily - {result.get('source_type', 'مصدر موثوق')}",
+                'reliability_score': result.get('reliability_rating', 0.8),
+                'search_engine': 'tavily_advanced',
+                'omani_keywords': result.get('omani_keywords', [])
+            }
+            standard_results.append(standard_result)
+        
+        return standard_results
+    
     def _format_message(self, msg: Dict[str, Any]) -> Dict[str, Any]:
         """تنسيق الرسالة للإرسال للعميل"""
         return {
