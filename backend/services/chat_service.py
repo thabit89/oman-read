@@ -262,6 +262,71 @@ class ChatService:
         
         return context
     
+    def _search_local_knowledge_base(self, query: str) -> Optional[Dict[str, Any]]:
+        """البحث في قاعدة المعرفة المحلية"""
+        query_lower = query.lower()
+        
+        # البحث في الشخصيات الأدبية
+        for figure in EXTRACTED_KNOWLEDGE['omani_literary_figures']:
+            if figure.lower() in query_lower:
+                # البحث عن التفاصيل في قاعدة البيانات
+                for category in OMANI_LITERATURE_KNOWLEDGE_BASE.values():
+                    if isinstance(category, dict):
+                        # البحث في الشعراء
+                        if 'poets' in category:
+                            for poet in category['poets']:
+                                if poet['name'] == figure:
+                                    return {
+                                        'content': f"الشاعر {poet['name']} من {poet.get('period', 'العصر القديم')}، {poet.get('significance', '')}. {poet.get('notes', '')}",
+                                        'source': 'الحياة الأدبية في عُمان - الجهضمي',
+                                        'reliability': 0.95,
+                                        'type': 'poet'
+                                    }
+                        
+                        # البحث في كتاب النثر
+                        if 'writers' in category:
+                            for writer in category['writers']:
+                                if writer['name'] == figure:
+                                    return {
+                                        'content': f"{writer['name']} {writer.get('type', '')} من {writer.get('family', '')}. {writer.get('significance', '')}. من أعماله: {writer.get('famous_work', '')}.",
+                                        'source': 'الحياة الأدبية في عُمان - الجهضمي',
+                                        'reliability': 0.95,
+                                        'type': 'prose_writer'
+                                    }
+                        
+                        # البحث في العلماء
+                        if 'scholars' in category:
+                            for scholar in category['scholars']:
+                                if scholar['name'] == figure:
+                                    return {
+                                        'content': f"{scholar['name']} {scholar.get('title', '')}. من أعماله: {scholar.get('works', '')}. {scholar.get('significance', '')}.",
+                                        'source': 'الحياة الأدبية في عُمان - الجهضمي',
+                                        'reliability': 0.95,
+                                        'type': 'scholar'
+                                    }
+        
+        # البحث في المفاهيم الأساسية
+        for concept in EXTRACTED_KNOWLEDGE['key_concepts']:
+            if any(word in query_lower for word in concept.lower().split()):
+                return {
+                    'content': f"من المفاهيم المهمة في الأدب العُماني القديم: {concept}. وفقاً لدراسة الجهضمي الأكاديمية حول الحياة الأدبية في عُمان حتى 134هـ.",
+                    'source': 'قاعدة المعرفة الأكاديمية',
+                    'reliability': 0.9,
+                    'type': 'concept'
+                }
+        
+        # البحث في الأعمال الأدبية
+        for work in EXTRACTED_KNOWLEDGE['literary_works']:
+            if any(word in work.lower() for word in query_lower.split() if len(word) > 3):
+                return {
+                    'content': f"من الأعمال الأدبية العُمانية القديمة: {work}. مذكور في الدراسات الأكاديمية حول تاريخ الأدب العُماني.",
+                    'source': 'الأعمال الأدبية العُمانية القديمة',
+                    'reliability': 0.9,
+                    'type': 'literary_work'
+                }
+        
+        return None
+    
     def _format_message(self, msg: Dict[str, Any]) -> Dict[str, Any]:
         """تنسيق الرسالة للإرسال للعميل"""
         return {
