@@ -1,0 +1,303 @@
+import os
+from typing import List, Dict, Any, Optional
+from tavily import TavilyClient
+import logging
+from dotenv import load_dotenv
+import asyncio
+
+load_dotenv()
+
+logger = logging.getLogger(__name__)
+
+class TavilyAdvancedSearchService:
+    """خدمة البحث المتقدمة باستخدام Tavily للأدب العُماني"""
+    
+    def __init__(self):
+        self.api_key = os.environ.get('TAVILY_API_KEY')
+        if not self.api_key:
+            raise ValueError("TAVILY_API_KEY not found in environment variables")
+        
+        self.client = TavilyClient(api_key=self.api_key)
+        
+        # مجالات البحث المتخصصة للأدب العُماني
+        self.search_domains = {
+            'academic': [
+                'jstor.org', 'academia.edu', 'researchgate.net',
+                'journals.omanstudies.om', 'omanliterature.org'
+            ],
+            'official': [
+                'moe.gov.om', 'heritage.gov.om', 'oman.om', 
+                'omanobserver.om', 'omandaily.om', 'shabiba.com'
+            ],
+            'cultural': [
+                'culturaloman.org', 'omanculture.net', 
+                'omanpoetry.org', 'omaniheritage.com'
+            ]
+        }
+    
+    async def search_omani_literature_advanced(
+        self, 
+        query: str, 
+        max_results: int = 5,
+        include_domains: List[str] = None
+    ) -> Dict[str, Any]:
+        """البحث المتقدم في الأدب العُماني باستخدام Tavily"""
+        
+        try:
+            # تحسين استعلام البحث للأدب العُماني
+            enhanced_query = self._enhance_query_for_omani_literature(query)
+            
+            # البحث باستخدام Tavily
+            search_response = self.client.search(
+                query=enhanced_query,
+                search_depth="advanced",  # بحث عميق
+                max_results=max_results,
+                include_answer=True,
+                include_domains=include_domains or self._get_priority_domains()
+            )
+            
+            # معالجة وتصفية النتائج
+            processed_results = self._process_tavily_results(search_response, query)
+            
+            return {
+                'query': query,
+                'enhanced_query': enhanced_query,
+                'results': processed_results,
+                'total_found': len(processed_results),
+                'search_engine': 'tavily_advanced',
+                'answer_summary': search_response.get('answer', ''),
+                'search_depth': 'advanced'
+            }
+            
+        except Exception as e:
+            logger.error(f"خطأ في بحث Tavily: {e}")
+            return {
+                'query': query,
+                'results': [],
+                'total_found': 0,
+                'error': str(e),
+                'search_engine': 'tavily_error'
+            }
+    
+    def _enhance_query_for_omani_literature(self, query: str) -> str:
+        """تحسين استعلام البحث للتركيز على الأدب العُماني"""
+        
+        # إضافة كلمات مفتاحية عُمانية
+        omani_terms = [
+            "عُمان", "عُماني", "Oman", "Omani literature",
+            "سلطنة عُمان", "الأدب العُماني", "الثقافة العُمانية"
+        ]
+        
+        # إضافة مصطلحات أدبية لتركيز البحث
+        literary_terms = [
+            "أدب", "شعر", "رواية", "قصة", "مسرحية", "نقد أدبي",
+            "literature", "poetry", "novel", "story", "criticism"
+        ]
+        
+        # تنظيف الاستعلام من الكلمات غير المفيدة
+        stop_words = ['أريد', 'أعطني', 'قل لي', 'أخبرني']
+        cleaned_query = query
+        for word in stop_words:
+            cleaned_query = cleaned_query.replace(word, '')
+        
+        # بناء استعلام محسن
+        enhanced = f"{cleaned_query} الأدب العُماني OR Omani literature OR عُمان أدب"
+        
+        # إضافة مصطلحات أكاديمية للحصول على مصادر موثوقة
+        enhanced += " site:edu OR site:gov.om OR academic OR journal OR research"
+        
+        return enhanced.strip()
+    
+    def _get_priority_domains(self) -> List[str]:
+        """الحصول على النطاقات ذات الأولوية للبحث"""
+        priority_domains = []
+        
+        # جمع أهم النطاقات من جميع الفئات
+        for category, domains in self.search_domains.items():
+            priority_domains.extend(domains[:2])  # أول نطاقين من كل فئة
+        
+        # إضافة نطاقات أكاديمية عامة
+        priority_domains.extend([
+            'wikipedia.org', 'britannica.com', 'scholar.google.com'
+        ])
+        
+        return priority_domains
+    
+    def _process_tavily_results(
+        self, 
+        search_response: Dict[str, Any], 
+        original_query: str
+    ) -> List[Dict[str, Any]]:
+        """معالجة وتصفية نتائج Tavily"""
+        
+        raw_results = search_response.get('results', [])
+        processed_results = []
+        
+        for result in raw_results:
+            # تقييم صلة النتيجة بالأدب العُماني
+            relevance_score = self._calculate_relevance_score(result, original_query)
+            
+            if relevance_score > 0.3:  # عتبة الصلة
+                processed_result = {
+                    'title': result.get('title', ''),
+                    'content': result.get('content', '')[:600],  # أول 600 حرف
+                    'url': result.get('url', ''),
+                    'score': result.get('score', 0),
+                    'relevance_score': relevance_score,
+                    'source_type': self._identify_source_type(result.get('url', '')),
+                    'reliability_rating': self._rate_source_reliability(result.get('url', '')),
+                    'published_date': result.get('published_date'),
+                    'raw_content': result.get('raw_content', '')[:200]  # محتوى خام قصير
+                }
+                
+                # إضافة تحليل المحتوى للكلمات المفتاحية
+                processed_result['omani_keywords'] = self._extract_omani_keywords(
+                    processed_result['content']
+                )
+                
+                processed_results.append(processed_result)
+        
+        # ترتيب النتائج حسب الصلة والموثوقية
+        processed_results.sort(
+            key=lambda x: (x['relevance_score'], x['reliability_rating']), 
+            reverse=True
+        )
+        
+        return processed_results
+    
+    def _calculate_relevance_score(self, result: Dict[str, Any], query: str) -> float:
+        """حساب درجة صلة النتيجة بالاستعلام والأدب العُماني"""
+        
+        content = (result.get('content', '') + ' ' + result.get('title', '')).lower()
+        query_lower = query.lower()
+        
+        score = 0.0
+        
+        # نقاط للكلمات المفتاحية العُمانية
+        omani_keywords = ['عُمان', 'عُماني', 'oman', 'omani', 'سلطنة']
+        for keyword in omani_keywords:
+            if keyword.lower() in content:
+                score += 0.3
+        
+        # نقاط للمصطلحات الأدبية
+        literary_terms = ['أدب', 'شعر', 'رواية', 'قصة', 'شاعر', 'literature', 'poetry']
+        for term in literary_terms:
+            if term.lower() in content:
+                score += 0.2
+        
+        # نقاط لتطابق كلمات الاستعلام
+        query_words = query_lower.split()
+        for word in query_words:
+            if len(word) > 2 and word in content:
+                score += 0.1
+        
+        return min(1.0, score)  # حد أقصى 1.0
+    
+    def _identify_source_type(self, url: str) -> str:
+        """تحديد نوع المصدر من الرابط"""
+        url_lower = url.lower()
+        
+        if '.edu' in url_lower or 'academic' in url_lower or 'journal' in url_lower:
+            return 'أكاديمي'
+        elif '.gov.om' in url_lower or 'official' in url_lower:
+            return 'حكومي رسمي'
+        elif 'wikipedia' in url_lower:
+            return 'موسوعي'
+        elif 'news' in url_lower or 'observer' in url_lower:
+            return 'صحفي'
+        else:
+            return 'عام'
+    
+    def _rate_source_reliability(self, url: str) -> float:
+        """تقييم موثوقية المصدر"""
+        url_lower = url.lower()
+        
+        # مصادر عالية الموثوقية
+        if any(domain in url_lower for domain in ['.edu', '.gov.om', 'jstor', 'academia.edu']):
+            return 0.9
+        
+        # مصادر متوسطة الموثوقية
+        elif any(domain in url_lower for domain in ['wikipedia', 'britannica', 'observer']):
+            return 0.7
+        
+        # مصادر منخفضة الموثوقية
+        else:
+            return 0.5
+    
+    def _extract_omani_keywords(self, content: str) -> List[str]:
+        """استخراج الكلمات المفتاحية العُمانية من المحتوى"""
+        
+        omani_specific_terms = [
+            'عُمان', 'عُماني', 'عُمانية', 'مسقط', 'صلالة', 'نزوى', 'صحار',
+            'الباطنة', 'ظفار', 'الداخلية', 'مسندم', 'الوسطى',
+            'سلطنة', 'سلطان', 'قابوس', 'هيثم', 'آل سعيد',
+            'خنجر', 'عنزة', 'هجن', 'نخيل', 'لبان', 'بخور',
+            'فرقة', 'رزحة', 'برعة', 'فن', 'تراث'
+        ]
+        
+        found_keywords = []
+        content_lower = content.lower()
+        
+        for term in omani_specific_terms:
+            if term.lower() in content_lower:
+                found_keywords.append(term)
+        
+        return found_keywords
+    
+    async def search_specific_author(self, author_name: str) -> Dict[str, Any]:
+        """بحث متخصص عن مؤلف عُماني معين"""
+        
+        # استعلام مخصص للمؤلفين
+        author_query = f'"{author_name}" شاعر عُماني OR "{author_name}" أديب عُماني OR "{author_name}" Omani poet OR "{author_name}" Omani writer'
+        
+        return await self.search_omani_literature_advanced(
+            query=author_query,
+            max_results=7,
+            include_domains=self.search_domains['academic'] + self.search_domains['official']
+        )
+    
+    async def search_literary_work(self, work_title: str, author: str = "") -> Dict[str, Any]:
+        """بحث متخصص عن عمل أدبي معين"""
+        
+        work_query = f'"{work_title}" {author} الأدب العُماني'
+        if author:
+            work_query += f' "{author}"'
+        
+        work_query += ' رواية OR قصيدة OR ديوان OR مسرحية OR قصة'
+        
+        return await self.search_omani_literature_advanced(
+            query=work_query,
+            max_results=5
+        )
+    
+    def format_results_for_llm(self, search_results: Dict[str, Any]) -> str:
+        """تنسيق نتائج البحث للذكاء الاصطناعي"""
+        
+        if not search_results.get('results'):
+            return "لم يتم العثور على نتائج موثوقة."
+        
+        formatted = f"نتائج البحث المتقدم لـ: {search_results['query']}\n\n"
+        
+        # إضافة الملخص إذا كان متوفراً
+        if search_results.get('answer_summary'):
+            formatted += f"الملخص: {search_results['answer_summary']}\n\n"
+        
+        # إضافة النتائج مع تقييم الموثوقية
+        for i, result in enumerate(search_results['results'], 1):
+            reliability_emoji = "🏆" if result['reliability_rating'] > 0.8 else "✅" if result['reliability_rating'] > 0.6 else "⚠️"
+            
+            formatted += f"{i}. {result['title']} {reliability_emoji}\n"
+            formatted += f"النوع: {result['source_type']} | الموثوقية: {result['reliability_rating']:.1f}/1.0\n"
+            formatted += f"المحتوى: {result['content'][:300]}...\n"
+            
+            if result['omani_keywords']:
+                formatted += f"كلمات مفتاحية عُمانية: {', '.join(result['omani_keywords'][:5])}\n"
+            
+            formatted += f"المصدر: {result['url']}\n\n"
+        
+        formatted += f"إجمالي النتائج: {search_results['total_found']} | محرك البحث: Tavily Advanced"
+        
+        return formatted
+
+# إنشاء مثيل خدمة Tavily
+tavily_search_service = TavilyAdvancedSearchService()
