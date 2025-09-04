@@ -4,6 +4,7 @@ from typing import List, Dict, Any
 import logging
 from urllib.parse import quote
 import re
+import random
 
 logger = logging.getLogger(__name__)
 
