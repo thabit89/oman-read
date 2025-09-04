@@ -323,6 +323,7 @@ export const Chat = () => {
           </Button>
         </div>
       </div>
+      </div>
     </div>
   );
 };
