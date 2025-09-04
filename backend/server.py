@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,10 +6,12 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime
 
+# استيراد خدمات جديدة
+from services.chat_service import ChatService
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -18,6 +20,9 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# إنشاء خدمة الدردشة
+chat_service = ChatService(db)
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -35,11 +40,65 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+class ChatMessageRequest(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+
+class ChatResponse(BaseModel):
+    message_id: str
+    text: str
+    session_id: str
+    timestamp: str
+    has_web_search: bool = False
+    model_used: Optional[str] = None
+
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "مرحباً! أنا غسان، مساعدك الأدبي العُماني الذكي"}
 
+@api_router.post("/chat/message", response_model=ChatResponse)
+async def send_message(request: ChatMessageRequest):
+    """إرسال رسالة لغسان والحصول على رد ذكي"""
+    try:
+        result = await chat_service.process_user_message(
+            message_text=request.message,
+            session_id=request.session_id
+        )
+        
+        return ChatResponse(
+            message_id=result['message_id'],
+            text=result['text'],
+            session_id=result['session_id'],
+            timestamp=result['timestamp'].isoformat() if hasattr(result['timestamp'], 'isoformat') else str(result['timestamp']),
+            has_web_search=result.get('has_web_search', False),
+            model_used=result.get('model_used')
+        )
+    except Exception as e:
+        logging.error(f"خطأ في إرسال الرسالة: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في معالجة الرسالة: {str(e)}")
+
+@api_router.get("/chat/history/{session_id}")
+async def get_chat_history(session_id: str, limit: int = 50):
+    """جلب تاريخ المحادثات لجلسة معينة"""
+    try:
+        messages = await chat_service.get_chat_history(session_id, limit)
+        return {"messages": messages}
+    except Exception as e:
+        logging.error(f"خطأ في جلب تاريخ المحادثات: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في جلب التاريخ: {str(e)}")
+
+@api_router.post("/chat/session")
+async def create_new_session():
+    """إنشاء جلسة محادثة جديدة"""
+    try:
+        session_id = await chat_service._create_new_session()
+        return {"session_id": session_id}
+    except Exception as e:
+        logging.error(f"خطأ في إنشاء الجلسة: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في إنشاء الجلسة: {str(e)}")
+
+# المسارات القديمة للاختبار
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
     status_dict = input.dict()
@@ -58,7 +117,7 @@ app.include_router(api_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
