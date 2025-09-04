@@ -8,6 +8,14 @@ import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { ChatService } from '../../services/chatService';
 
+// Function to format message text with HTML support
+const formatMessageText = (text) => {
+  return text
+    .replace(/\n/g, '<br>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+};
+
 export const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
