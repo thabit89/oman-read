@@ -207,20 +207,25 @@ async def get_knowledge_stats():
 #         logging.error(f"خطأ في إضافة العمل: {e}")
 #         raise HTTPException(status_code=500, detail=f"خطأ في الإضافة: {str(e)}")
 
-# @api_router.get("/search/semantic")
-# async def semantic_search(query: str, content_types: str = "", limit: int = 5):
-#     """البحث الدلالي المتقدم"""
-#     try:
-#         content_types_list = content_types.split(',') if content_types else None
-#         results = await embeddings_service.semantic_search(
-#             query=query,
-#             content_types=content_types_list,
-#             limit=limit
-#         )
-#         return {"results": results}
-#     except Exception as e:
-#         logging.error(f"خطأ في البحث الدلالي: {e}")
-#         raise HTTPException(status_code=500, detail=f"خطأ في البحث: {str(e)}")
+@api_router.post("/collect/simple")
+async def simple_collect_sources():
+    """جمع بسيط للمصادر من المقابلات والمقالات"""
+    try:
+        results = await simple_collector.bulk_collect_all_authors()
+        return results
+    except Exception as e:
+        logging.error(f"خطأ في الجمع البسيط: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في الجمع: {str(e)}")
+
+@api_router.get("/collect/author/{author_name}")
+async def collect_for_specific_author(author_name: str):
+    """جمع مصادر لمؤلف محدد"""
+    try:
+        results = await simple_collector.collect_sources_for_author(author_name)
+        return results
+    except Exception as e:
+        logging.error(f"خطأ في جمع مصادر المؤلف: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في الجمع: {str(e)}")
 
 @api_router.get("/chat/history/{session_id}")
 async def get_chat_history(session_id: str, limit: int = 50):
