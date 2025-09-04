@@ -33,6 +33,13 @@ knowledge_base = OmaniLiteratureKnowledgeBase(db)
 # Create the main app without a prefix
 app = FastAPI()
 
+# إعداد مجلد الصور الثابتة
+UPLOADS_DIR = Path("/app/frontend/public/uploads")
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+
+# تقديم الصور الثابتة
+app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
