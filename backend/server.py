@@ -28,9 +28,12 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# إنشاء خدمة الدردشة وقاعدة المعرفة
+# إنشاء خدمة الدردشة وقاعدة المعرفة والنظم المتقدمة
 chat_service = ChatService(db)
 knowledge_base = OmaniLiteratureKnowledgeBase(db)
+rag_service = AdvancedRAGService(db)
+enhanced_ghassan_service = EnhancedGhassanService(db)
+embeddings_service = EmbeddingsService(db)
 
 # Create the main app without a prefix
 app = FastAPI()
