@@ -19,6 +19,8 @@ function App() {
           <Route path="/knowledge" element={<KnowledgeManager />} />
           <Route path="/advanced" element={<AdvancedKnowledgeManager />} />
           <Route path="/upload" element={<ImageUploader />} />
+          <Route path="/audiobooks" element={<AudioBooks />} />
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </BrowserRouter>
     </div>
