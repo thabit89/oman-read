@@ -128,14 +128,15 @@ async def get_knowledge_stats():
         logging.error(f"خطأ في جلب الإحصائيات: {e}")
         raise HTTPException(status_code=500, detail=f"خطأ في جلب الإحصائيات: {str(e)}")
 
-@api_router.get("/knowledge/search")
-async def search_knowledge(query: str, limit: int = 5):
-    """البحث في قاعدة المعرفة"""
+@api_router.get("/search/test-tavily")
+async def test_tavily_search(query: str):
+    """اختبار البحث المتقدم مع Tavily للمقابلات والمقالات"""
     try:
-        results = await knowledge_base.search_knowledge(query, limit)
-        return {"results": results}
+        from services.tavily_service import tavily_search_service
+        results = await tavily_search_service.search_omani_literature_advanced(query)
+        return results
     except Exception as e:
-        logging.error(f"خطأ في البحث: {e}")
+        logging.error(f"خطأ في اختبار Tavily: {e}")
         raise HTTPException(status_code=500, detail=f"خطأ في البحث: {str(e)}")
 
 @api_router.get("/chat/history/{session_id}")
