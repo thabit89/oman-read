@@ -77,14 +77,15 @@ class ChatService:
             needs_advanced_analysis = self._needs_advanced_literary_analysis(message_text)
             use_claude = self._should_use_claude_analysis(message_text)
             
-            # توليد رد غسان مع السياق
-            logger.info(f"استخدام النظام المتقدم مع السياق: {message_text[:50]}...")
+            # توليد رد غسان مع السياق التعليمي
+            logger.info(f"استخدام النظام المتقدم مع السياق التعليمي: {message_text[:50]}...")
             llm_response = await ghassan_llm_service.generate_response_with_search(
                 message_text, 
                 search_results=search_results,
                 session_id=session_id,
                 use_claude=use_claude,
-                conversation_context=conversation_context  # إضافة السياق
+                conversation_context=conversation_context,
+                curriculum_context=curriculum_context  # إضافة السياق التعليمي
             )
             
             # التحقق إذا كان الرد يحتاج روابط خارجية بديلة
