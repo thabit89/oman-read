@@ -47,11 +47,31 @@ export const AdvancedKnowledgeManager = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/rag/stats`);
-      const data = await response.json();
-      setStats(data);
+      // محاولة الحصول على إحصائيات من الـ endpoint البسيط
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/sources/stats`);
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      } else {
+        // استخدام إحصائيات افتراضية إذا لم يكن الـ endpoint متاحاً
+        setStats({
+          authors_count: 0,
+          works_count: 0,
+          sources_count: 0,
+          embeddings: { total_embeddings: 0 },
+          recent_queries: []
+        });
+      }
     } catch (error) {
       console.error('خطأ في جلب الإحصائيات:', error);
+      // إحصائيات افتراضية في حالة الخطأ
+      setStats({
+        authors_count: 0,
+        works_count: 0,
+        sources_count: 0,
+        embeddings: { total_embeddings: 0 },
+        recent_queries: []
+      });
     }
   };
 
