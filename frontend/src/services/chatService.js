@@ -60,6 +60,22 @@ export class ChatService {
     }
   }
   
+  static async testConnection() {
+    try {
+      const response = await axios.get(`${API}/`);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      console.error('خطأ في الاتصال:', error);
+      return {
+        success: false,
+        error: 'خطأ في الاتصال بالخادم'
+      };
+    }
+  }
+  
   static async sendAdvancedMessage(message, sessionId = null) {
     try {
       const response = await axios.post(`${API}/chat/message-advanced`, {
