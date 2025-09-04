@@ -12,6 +12,8 @@ from datetime import datetime
 
 # استيراد خدمات جديدة
 from services.chat_service import ChatService
+from services.knowledge_service import OmaniLiteratureKnowledgeBase
+from services.verification_service import information_verifier
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
