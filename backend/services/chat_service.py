@@ -8,6 +8,7 @@ from .search_service import web_search_service
 from .llm_service import ghassan_llm_service
 from .claude_service import claude_direct_service
 from .tavily_service import tavily_search_service
+from data.omani_knowledge_base import OMANI_LITERATURE_KNOWLEDGE_BASE, EXTRACTED_KNOWLEDGE
 
 logger = logging.getLogger(__name__)
 
