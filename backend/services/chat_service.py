@@ -1,0 +1,171 @@
+from typing import List, Dict, Any, Optional
+from motor.motor_asyncio import AsyncIOMotorCollection
+from datetime import datetime
+import uuid
+import logging
+
+from .search_service import web_search_service
+from .llm_service import ghassan_llm_service
+
+logger = logging.getLogger(__name__)
+
+class ChatService:
+    def __init__(self, db):
+        self.db = db
+        self.messages_collection: AsyncIOMotorCollection = db.messages
+        self.sessions_collection: AsyncIOMotorCollection = db.sessions
+    
+    async def process_user_message(
+        self,
+        message_text: str,
+        session_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """معالجة رسالة المستخدم وإنتاج رد غسان"""
+        
+        try:
+            # إنشاء session_id جديد إذا لم يكن موجوداً
+            if not session_id:
+                session_id = await self._create_new_session()
+            
+            # حفظ رسالة المستخدم
+            user_message = await self._save_message(
+                text=message_text,
+                sender='user',
+                session_id=session_id
+            )
+            
+            # تحديد إذا كان يحتاج بحث
+            needs_search = self._message_needs_search(message_text)
+            search_results = []
+            
+            if needs_search:
+                logger.info(f"رسالة تحتاج بحث: {message_text}")
+                search_results = await web_search_service.search_omani_literature(message_text)
+            
+            # توليد رد غسان
+            llm_response = await ghassan_llm_service.generate_response_with_search(
+                user_message=message_text,
+                search_results=search_results,
+                session_id=session_id,
+                use_claude=ghassan_llm_service._should_use_claude(message_text)
+            )
+            
+            # حفظ رد غسان
+            ghassan_message = await self._save_message(
+                text=llm_response['text'],
+                sender='ghassan',
+                session_id=session_id,
+                metadata={
+                    'model_used': llm_response.get('model_used'),
+                    'has_web_search': needs_search,
+                    'search_results_count': len(search_results)
+                }
+            )
+            
+            # تحديث معلومات الجلسة
+            await self._update_session(session_id, llm_response['text'])
+            
+            return {
+                'message_id': str(ghassan_message['_id']),
+                'text': llm_response['text'],
+                'session_id': session_id,
+                'timestamp': ghassan_message['timestamp'],
+                'has_web_search': needs_search,
+                'model_used': llm_response.get('model_used', 'unknown')
+            }
+            
+        except Exception as e:
+            logger.error(f"خطأ في معالجة الرسالة: {e}")
+            # رد تلقائي في حالة الخطأ
+            return {
+                'message_id': str(uuid.uuid4()),
+                'text': 'عذراً، واجهت مشكلة تقنية. أرجو المحاولة مرة أخرى.',
+                'session_id': session_id or str(uuid.uuid4()),
+                'timestamp': datetime.utcnow(),
+                'has_web_search': False,
+                'model_used': 'error',
+                'error': str(e)
+            }
+    
+    async def get_chat_history(self, session_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """جلب تاريخ المحادثات لجلسة معينة"""
+        try:
+            messages = await self.messages_collection.find(
+                {'session_id': session_id}
+            ).sort('timestamp', 1).limit(limit).to_list(limit)
+            
+            return [self._format_message(msg) for msg in messages]
+            
+        except Exception as e:
+            logger.error(f"خطأ في جلب تاريخ المحادثات: {e}")
+            return []
+    
+    async def _create_new_session(self) -> str:
+        """إنشاء جلسة جديدة"""
+        session_id = str(uuid.uuid4())
+        session_data = {
+            '_id': session_id,
+            'created_at': datetime.utcnow(),
+            'updated_at': datetime.utcnow(),
+            'message_count': 0,
+            'title': 'محادثة جديدة مع غسان'
+        }
+        
+        await self.sessions_collection.insert_one(session_data)
+        return session_id
+    
+    async def _save_message(
+        self,
+        text: str,
+        sender: str,
+        session_id: str,
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """حفظ رسالة في قاعدة البيانات"""
+        message_data = {
+            '_id': str(uuid.uuid4()),
+            'text': text,
+            'sender': sender,
+            'session_id': session_id,
+            'timestamp': datetime.utcnow(),
+            'metadata': metadata or {}
+        }
+        
+        await self.messages_collection.insert_one(message_data)
+        return message_data
+    
+    async def _update_session(self, session_id: str, last_message: str):
+        """تحديث معلومات الجلسة"""
+        await self.sessions_collection.update_one(
+            {'_id': session_id},
+            {
+                '$set': {
+                    'updated_at': datetime.utcnow(),
+                    'last_message': last_message[:100] + '...' if len(last_message) > 100 else last_message
+                },
+                '$inc': {'message_count': 1}
+            }
+        )
+    
+    def _message_needs_search(self, message: str) -> bool:
+        """تحديد إذا كانت الرسالة تحتاج بحث عبر الإنترنت"""
+        search_indicators = [
+            'أخبرني عن', 'معلومات عن', 'من هو', 'من هي', 'ما هو', 'ما هي',
+            'بحث', 'ابحث', 'اعثر على', 'أريد معلومات', 'هل تعرف',
+            'تفاصيل', 'خلفية', 'سيرة', 'تاريخ', 'نشأة', 'ولادة',
+            'أعمال', 'كتب', 'قصائد', 'روايات', 'مؤلفات'
+        ]
+        
+        message_lower = message.lower()
+        return any(indicator in message_lower for indicator in search_indicators)
+    
+    def _format_message(self, msg: Dict[str, Any]) -> Dict[str, Any]:
+        """تنسيق الرسالة للإرسال للعميل"""
+        return {
+            'id': msg['_id'],
+            'text': msg['text'],
+            'sender': msg['sender'],
+            'timestamp': msg['timestamp'].isoformat(),
+            'hasWebSearch': msg.get('metadata', {}).get('has_web_search', False),
+            'modelUsed': msg.get('metadata', {}).get('model_used')
+        }
