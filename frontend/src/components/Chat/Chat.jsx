@@ -141,32 +141,76 @@ export const Chat = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
-      {/* Header */}
-      <div className="bg-white border-b border-emerald-100 px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 ring-2 ring-emerald-200">
-            <AvatarImage src="/ghassan-avatar.jpg" alt="غسان" />
-            <AvatarFallback className="bg-emerald-500 text-white font-bold">
-              غ
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="font-bold text-emerald-800 text-lg">غسان</h1>
-            <p className="text-sm text-emerald-600">المساعد الأدبي العُماني الذكي</p>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <a 
-              href="/advanced" 
-              className="text-emerald-600 hover:text-emerald-800 transition-colors"
-              title="إدارة متقدمة"
-            >
-              <BookOpen className="h-5 w-5" />
-            </a>
-            <MessageCircle className="h-5 w-5 text-emerald-600" />
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50">
+      {/* Animated Background Pattern */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-4 -left-4 w-72 h-72 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/3 right-8 w-96 h-96 bg-gradient-to-r from-emerald-400/8 to-teal-400/8 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-8 left-1/4 w-64 h-64 bg-gradient-to-r from-amber-400/10 to-orange-400/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
+
+      {/* Main Container */}
+      <div className="relative z-10 flex flex-col h-screen max-w-6xl mx-auto">
+        
+        {/* Enhanced Header */}
+        <div className="bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-lg sticky top-0 z-20">
+          <div className="px-6 py-4">
+            <div className="flex items-center gap-4">
+              
+              {/* Avatar with Glow Effect */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full blur animate-pulse"></div>
+                <Avatar className="relative h-14 w-14 ring-2 ring-white/50 shadow-lg">
+                  <AvatarImage src="/ghassan-avatar.jpg" alt="غسان" />
+                  <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-lg">
+                    غ
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+
+              {/* Title and Description */}
+              <div className="flex-1">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-800 to-teal-700 bg-clip-text text-transparent">
+                    غسان
+                  </h1>
+                  <Badge variant="secondary" className="bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-700 border-emerald-200">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    ذكي ومتطور
+                  </Badge>
+                </div>
+                <p className="text-emerald-600 text-sm mt-1">
+                  المساعد الأدبي العُماني الذكي • مدعوم بالذكاء الاصطناعي والبحث المتقدم
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                >
+                  <a href="/knowledge" title="إدارة المصادر">
+                    <BookOpen className="h-5 w-5" />
+                  </a>
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
+                >
+                  <a href="/advanced" title="النظام المتقدم">
+                    <Brain className="h-5 w-5" />
+                  </a>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Messages Area */}
       <ScrollArea className="flex-1 px-4 py-4" ref={scrollAreaRef}>
