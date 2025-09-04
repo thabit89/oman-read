@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, BookOpen, MessageCircle, Search, Globe } from 'lucide-react';
+import { Send, BookOpen, MessageCircle, Search, Globe, Sparkles, Brain } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Card, CardContent } from '../ui/card';
+import { Badge } from '../ui/badge';
 import { ChatService } from '../../services/chatService';
 
 export const Chat = () => {
