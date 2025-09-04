@@ -136,43 +136,43 @@ async def get_knowledge_stats():
         logging.error(f"خطأ في جلب الإحصائيات: {e}")
         raise HTTPException(status_code=500, detail=f"خطأ في جلب الإحصائيات: {str(e)}")
 
-@api_router.post("/chat/message-advanced", response_model=ChatResponse)
-async def send_message_advanced(request: ChatMessageRequest):
-    """إرسال رسالة لغسان المطور مع نظام RAG متكامل"""
-    try:
-        # استخدام النظام المطور
-        result = await enhanced_ghassan_service.process_intelligent_query(
-            user_message=request.message,
-            session_id=request.session_id or str(uuid.uuid4()),
-            conversation_context=""  # سيتم تحسينه لاحقاً
-        )
-        
-        # حفظ في قاعدة البيانات
-        message_id = str(uuid.uuid4())
-        await chat_service._save_message(
-            text=result['text'],
-            sender='ghassan',
-            session_id=request.session_id or str(uuid.uuid4()),
-            metadata={
-                'model_used': result.get('model_used'),
-                'sources_used': result.get('sources_used', 0),
-                'has_verified_sources': result.get('has_verified_sources', False)
-            }
-        )
-        
-        return ChatResponse(
-            message_id=message_id,
-            text=result['text'],
-            session_id=request.session_id or str(uuid.uuid4()),
-            timestamp=datetime.utcnow().isoformat(),
-            has_web_search=result.get('sources_used', 0) > 0,
-            model_used=result.get('model_used'),
-            reliability_score=0.95,  # النظام المتقدم أكثر دقة
-            confidence_level=result.get('context_confidence', 'عالٍ')
-        )
-    except Exception as e:
-        logging.error(f"خطأ في الرسالة المتقدمة: {e}")
-        raise HTTPException(status_code=500, detail=f"خطأ في المعالجة المتقدمة: {str(e)}")
+# @api_router.post("/chat/message-advanced", response_model=ChatResponse)
+# async def send_message_advanced(request: ChatMessageRequest):
+#     """إرسال رسالة لغسان المطور مع نظام RAG متكامل"""
+#     try:
+#         # استخدام النظام المطور
+#         result = await enhanced_ghassan_service.process_intelligent_query(
+#             user_message=request.message,
+#             session_id=request.session_id or str(uuid.uuid4()),
+#             conversation_context=""  # سيتم تحسينه لاحقاً
+#         )
+#         
+#         # حفظ في قاعدة البيانات
+#         message_id = str(uuid.uuid4())
+#         await chat_service._save_message(
+#             text=result['text'],
+#             sender='ghassan',
+#             session_id=request.session_id or str(uuid.uuid4()),
+#             metadata={
+#                 'model_used': result.get('model_used'),
+#                 'sources_used': result.get('sources_used', 0),
+#                 'has_verified_sources': result.get('has_verified_sources', False)
+#             }
+#         )
+#         
+#         return ChatResponse(
+#             message_id=message_id,
+#             text=result['text'],
+#             session_id=request.session_id or str(uuid.uuid4()),
+#             timestamp=datetime.utcnow().isoformat(),
+#             has_web_search=result.get('sources_used', 0) > 0,
+#             model_used=result.get('model_used'),
+#             reliability_score=0.95,  # النظام المتقدم أكثر دقة
+#             confidence_level=result.get('context_confidence', 'عالٍ')
+#         )
+#     except Exception as e:
+#         logging.error(f"خطأ في الرسالة المتقدمة: {e}")
+#         raise HTTPException(status_code=500, detail=f"خطأ في المعالجة المتقدمة: {str(e)}")
 
 @api_router.post("/rag/collect-sources")
 async def auto_collect_sources():
