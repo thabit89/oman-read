@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, BookOpen, MessageCircle, Search, Globe, Sparkles, Brain, Upload } from 'lucide-react';
+import { Send, BookOpen, MessageCircle, Search, Globe, Sparkles, Brain, Music, Mail } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
