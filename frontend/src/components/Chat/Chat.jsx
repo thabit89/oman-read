@@ -154,7 +154,13 @@ export const Chat = () => {
             <p className="text-sm text-emerald-600">المساعد الأدبي العُماني الذكي</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-emerald-600" />
+            <a 
+              href="/advanced" 
+              className="text-emerald-600 hover:text-emerald-800 transition-colors"
+              title="إدارة متقدمة"
+            >
+              <BookOpen className="h-5 w-5" />
+            </a>
             <MessageCircle className="h-5 w-5 text-emerald-600" />
           </div>
         </div>
