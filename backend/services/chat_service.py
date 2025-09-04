@@ -208,3 +208,14 @@ class ChatService:
             context += f"المحتوى: {result.get('content', '')[:200]}...\n\n"
         
         return context
+    
+    def _format_message(self, msg: Dict[str, Any]) -> Dict[str, Any]:
+        """تنسيق الرسالة للإرسال للعميل"""
+        return {
+            'id': msg['_id'],
+            'text': msg['text'],
+            'sender': msg['sender'],
+            'timestamp': msg['timestamp'].isoformat(),
+            'hasWebSearch': msg.get('metadata', {}).get('has_web_search', False),
+            'modelUsed': msg.get('metadata', {}).get('model_used')
+        }
