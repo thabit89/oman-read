@@ -22,12 +22,16 @@ class ChatService:
         message_text: str,
         session_id: Optional[str] = None
     ) -> Dict[str, Any]:
-        """معالجة رسالة المستخدم وإنتاج رد غسان"""
+        """معالجة رسالة المستخدم مع تذكر السياق"""
         
         try:
             # إنشاء session_id جديد إذا لم يكن موجوداً
             if not session_id:
                 session_id = await self._create_new_session()
+            
+            # **جلب المحادثة السابقة للسياق**
+            recent_messages = await self.get_chat_history(session_id, limit=5)
+            conversation_context = self._build_conversation_context(recent_messages)
             
             # حفظ رسالة المستخدم
             user_message = await self._save_message(
