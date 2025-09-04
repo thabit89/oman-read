@@ -43,13 +43,27 @@ class ChatService:
                 logger.info(f"رسالة تحتاج بحث: {message_text}")
                 search_results = await web_search_service.search_omani_literature(message_text)
             
+            # تحديد إذا كان يحتاج تحليل أدبي متقدم
+            needs_advanced_analysis = self._needs_advanced_literary_analysis(message_text)
+            use_claude = self._should_use_claude_analysis(message_text)
+            
             # توليد رد غسان
-            llm_response = await ghassan_llm_service.generate_response_with_search(
-                user_message=message_text,
-                search_results=search_results,
-                session_id=session_id,
-                use_claude=ghassan_llm_service._should_use_claude(message_text)
-            )
+            if needs_advanced_analysis and use_claude:
+                logger.info(f"استخدام Claude المباشر للتحليل المتقدم: {message_text[:50]}...")
+                search_context = self._format_search_context(search_results) if search_results else ""
+                llm_response = await claude_direct_service.analyze_literary_text(
+                    user_message=message_text,
+                    search_context=search_context,
+                    session_id=session_id
+                )
+            else:
+                # استخدام النظام المدمج العادي
+                llm_response = await ghassan_llm_service.generate_response_with_search(
+                    user_message=message_text,
+                    search_results=search_results,
+                    session_id=session_id,
+                    use_claude=use_claude
+                )
             
             # حفظ رد غسان
             ghassan_message = await self._save_message(
