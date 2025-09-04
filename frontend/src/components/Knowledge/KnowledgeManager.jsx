@@ -41,10 +41,20 @@ export const KnowledgeManager = () => {
         body: JSON.stringify(payload)
       });
 
+      // تحقق من حالة الاستجابة
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
 
+      // تحقق من وجود النتيجة
+      if (!result) {
+        throw new Error('لم يتم الحصول على استجابة من الخادم');
+      }
+
       if (result.success) {
-        setMessage(`تم إضافة المصدر بنجاح! تم إنشاء ${result.knowledge_entries} مدخل معرفي.`);
+        setMessage(`تم إضافة المصدر بنجاح! تم إنشاء ${result.knowledge_entries || 'عدة'} مدخل معرفي.`);
         setMessageType('success');
         
         // إعادة تعيين النموذج
@@ -58,7 +68,7 @@ export const KnowledgeManager = () => {
           tags: ''
         });
       } else {
-        setMessage(`خطأ: ${result.message || result.error}`);
+        setMessage(`خطأ: ${result.message || result.error || 'خطأ غير معروف'}`);
         setMessageType('error');
       }
     } catch (error) {
