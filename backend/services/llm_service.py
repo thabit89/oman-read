@@ -282,7 +282,7 @@ class GhassanLLMService:
         
         return any(keyword in user_message for keyword in claude_keywords)
     
-    def _add_accuracy_instructions(self, message: str) -> str:
+    def _add_advanced_instructions(self, message: str) -> str:
         """إضافة تعليمات التفكير المتقدم والإبداعي"""
         advanced_instructions = """
         
