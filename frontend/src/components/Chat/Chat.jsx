@@ -34,19 +34,43 @@ export const Chat = () => {
 
     setMessages(prev => [...prev, userMessage]);
     setNewMessage('');
-    setIsTyping(true);
+    
+    // Check if message might need web search
+    const needsSearch = newMessage.includes('أخبرني عن') || 
+                       newMessage.includes('معلومات عن') ||
+                       newMessage.includes('من هو') ||
+                       newMessage.includes('ما هي') ||
+                       newMessage.includes('بحث') ||
+                       newMessage.includes('اعثر على');
+
+    if (needsSearch) {
+      setIsSearching(true);
+      setTimeout(() => {
+        setIsSearching(false);
+        setIsTyping(true);
+      }, 2000); // Show searching for 2 seconds
+    } else {
+      setIsTyping(true);
+    }
 
     // Simulate AI response
     setTimeout(() => {
+      const responses = [
+        'أهلاً وسهلاً! دعني أبحث لك في مصادر الأدب العُماني الموثوقة... لقد وجدت معلومات قيمة حول هذا الموضوع. الأدب العُماني غني بالتراث والإبداع المعاصر.',
+        'بحثت عبر الإنترنت في المصادر الأدبية العُمانية، وإليك ما وجدت: هذا موضوع مثير للاهتمام في الأدب العُماني!',
+        'استخدمت قدراتي البحثية للعثور على معلومات دقيقة حول استفسارك من مصادر موثوقة في الأدب العُماني.',
+      ];
+      
       const aiResponse = {
         id: Date.now() + 1,
-        text: 'أهلاً وسهلاً! أنا غسان، مساعدك الأدبي العُماني الذكي. سأكون سعيداً بمساعدتك في استكشاف الأدب العُماني الغني والإجابة على أسئلتك حول الشعر والرواية والقصص القصيرة والمسرحيات.',
+        text: responses[Math.floor(Math.random() * responses.length)],
         sender: 'ghassan',
         timestamp: new Date().toISOString(),
+        hasWebSearch: needsSearch
       };
       setMessages(prev => [...prev, aiResponse]);
       setIsTyping(false);
-    }, 1500);
+    }, needsSearch ? 4000 : 1500);
   };
 
   const handleKeyPress = (e) => {
