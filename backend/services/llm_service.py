@@ -104,10 +104,11 @@ class GhassanLLMService:
                 system_message=self.system_message
             ).with_model(provider, model)
             
-            # إعداد الرسالة مع نتائج البحث والسياق والتحقق من الدقة
+            # إعداد الرسالة مع نتائج البحث والسياق والتعليمي والتحقق من الدقة
             enhanced_message = self._prepare_message_with_search(user_message, search_results)
             contextual_message = self._add_conversation_context(enhanced_message, conversation_context)
-            final_message = self._add_accuracy_instructions(contextual_message)
+            educational_message = self._add_educational_context(contextual_message, curriculum_context)
+            final_message = self._add_advanced_instructions(educational_message)
             
             # إنشاء كائن UserMessage
             user_msg = UserMessage(text=final_message)
