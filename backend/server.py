@@ -174,60 +174,60 @@ async def get_knowledge_stats():
 #         logging.error(f"خطأ في الرسالة المتقدمة: {e}")
 #         raise HTTPException(status_code=500, detail=f"خطأ في المعالجة المتقدمة: {str(e)}")
 
-@api_router.post("/rag/collect-sources")
-async def auto_collect_sources():
-    """جمع تلقائي للمصادر الأكاديمية والمقابلات"""
-    try:
-        results = await rag_service.auto_collect_and_process()
-        return results
-    except Exception as e:
-        logging.error(f"خطأ في جمع المصادر: {e}")
-        raise HTTPException(status_code=500, detail=f"خطأ في الجمع: {str(e)}")
+# @api_router.post("/rag/collect-sources")
+# async def auto_collect_sources():
+#     """جمع تلقائي للمصادر الأكاديمية والمقابلات"""
+#     try:
+#         results = await rag_service.auto_collect_and_process()
+#         return results
+#     except Exception as e:
+#         logging.error(f"خطأ في جمع المصادر: {e}")
+#         raise HTTPException(status_code=500, detail=f"خطأ في الجمع: {str(e)}")
 
-@api_router.get("/rag/stats")
-async def get_rag_stats():
-    """إحصائيات نظام RAG الشامل"""
-    try:
-        stats = await rag_service.get_rag_statistics()
-        return stats
-    except Exception as e:
-        logging.error(f"خطأ في إحصائيات RAG: {e}")
-        raise HTTPException(status_code=500, detail=f"خطأ في الإحصائيات: {str(e)}")
+# @api_router.get("/rag/stats")
+# async def get_rag_stats():
+#     """إحصائيات نظام RAG الشامل"""
+#     try:
+#         stats = await rag_service.get_rag_statistics()
+#         return stats
+#     except Exception as e:
+#         logging.error(f"خطأ في إحصائيات RAG: {e}")
+#         raise HTTPException(status_code=500, detail=f"خطأ في الإحصائيات: {str(e)}")
 
-@api_router.post("/authors/add")
-async def add_verified_author(author_data: dict):
-    """إضافة مؤلف محقق لقاعدة البيانات"""
-    try:
-        result = await rag_service.add_verified_author(author_data)
-        return result
-    except Exception as e:
-        logging.error(f"خطأ في إضافة المؤلف: {e}")
-        raise HTTPException(status_code=500, detail=f"خطأ في الإضافة: {str(e)}")
+# @api_router.post("/authors/add")
+# async def add_verified_author(author_data: dict):
+#     """إضافة مؤلف محقق لقاعدة البيانات"""
+#     try:
+#         result = await rag_service.add_verified_author(author_data)
+#         return result
+#     except Exception as e:
+#         logging.error(f"خطأ في إضافة المؤلف: {e}")
+#         raise HTTPException(status_code=500, detail=f"خطأ في الإضافة: {str(e)}")
 
-@api_router.post("/works/add")
-async def add_verified_work(work_data: dict):
-    """إضافة عمل أدبي محقق لقاعدة البيانات"""
-    try:
-        result = await rag_service.add_verified_work(work_data)
-        return result
-    except Exception as e:
-        logging.error(f"خطأ في إضافة العمل: {e}")
-        raise HTTPException(status_code=500, detail=f"خطأ في الإضافة: {str(e)}")
+# @api_router.post("/works/add")
+# async def add_verified_work(work_data: dict):
+#     """إضافة عمل أدبي محقق لقاعدة البيانات"""
+#     try:
+#         result = await rag_service.add_verified_work(work_data)
+#         return result
+#     except Exception as e:
+#         logging.error(f"خطأ في إضافة العمل: {e}")
+#         raise HTTPException(status_code=500, detail=f"خطأ في الإضافة: {str(e)}")
 
-@api_router.get("/search/semantic")
-async def semantic_search(query: str, content_types: str = "", limit: int = 5):
-    """البحث الدلالي المتقدم"""
-    try:
-        content_types_list = content_types.split(',') if content_types else None
-        results = await embeddings_service.semantic_search(
-            query=query,
-            content_types=content_types_list,
-            limit=limit
-        )
-        return {"results": results}
-    except Exception as e:
-        logging.error(f"خطأ في البحث الدلالي: {e}")
-        raise HTTPException(status_code=500, detail=f"خطأ في البحث: {str(e)}")
+# @api_router.get("/search/semantic")
+# async def semantic_search(query: str, content_types: str = "", limit: int = 5):
+#     """البحث الدلالي المتقدم"""
+#     try:
+#         content_types_list = content_types.split(',') if content_types else None
+#         results = await embeddings_service.semantic_search(
+#             query=query,
+#             content_types=content_types_list,
+#             limit=limit
+#         )
+#         return {"results": results}
+#     except Exception as e:
+#         logging.error(f"خطأ في البحث الدلالي: {e}")
+#         raise HTTPException(status_code=500, detail=f"خطأ في البحث: {str(e)}")
 
 @api_router.get("/chat/history/{session_id}")
 async def get_chat_history(session_id: str, limit: int = 50):
