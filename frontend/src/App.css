@@ -97,18 +97,73 @@
   50% { opacity: 0.5; }
 }
 
-/* Enhanced bounce animation */
-@keyframes enhancedBounce {
-  0%, 80%, 100% {
-    transform: scale(0) translateY(0);
-  }
-  40% {
-    transform: scale(1) translateY(-10px);
-  }
+/* Enhanced message formatting */
+.message-content {
+  line-height: 1.8;
+  font-size: 14px;
 }
 
-.enhanced-bounce {
-  animation: enhancedBounce 1.4s infinite ease-in-out both;
+.message-content strong {
+  font-weight: 700;
+  color: rgb(37 99 235); /* blue-600 */
+  font-size: 15px;
+}
+
+.message-content em {
+  font-style: italic;
+  color: rgb(99 102 241); /* indigo-500 */
+}
+
+.message-content br {
+  margin-bottom: 0.75rem;
+  display: block;
+  content: "";
+}
+
+/* Better paragraph spacing */
+.message-content p {
+  margin-bottom: 1rem;
+}
+
+/* List formatting in messages */
+.message-content ul {
+  margin: 0.75rem 0;
+  padding-right: 1.25rem;
+}
+
+.message-content li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Links in messages */
+.message-content a {
+  color: rgb(37 99 235);
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.message-content a:hover {
+  color: rgb(29 78 216);
+}
+
+/* Better readability for Arabic text */
+.arabic-text {
+  font-family: 'Segoe UI', 'Tahoma', 'Arial Unicode MS', 'Geeza Pro', sans-serif;
+  font-size: 14px;
+  line-height: 1.8;
+  text-align: right;
+  direction: rtl;
+}
+
+/* Improved spacing for sections */
+.message-section {
+  margin-bottom: 1.5rem;
+}
+
+.message-section:last-child {
+  margin-bottom: 0;
 }
 
 /* Backdrop blur support */
