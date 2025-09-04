@@ -17,6 +17,7 @@ from services.chat_service import ChatService
 from services.knowledge_service import OmaniLiteratureKnowledgeBase
 from services.verification_service import information_verifier
 from services.simple_collector import simple_collector
+from services.nizwa_extractor import nizwa_extractor
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
