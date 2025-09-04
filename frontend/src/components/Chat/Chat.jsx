@@ -7,10 +7,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { ChatService } from '../../services/chatService';
 
 export const Chat = () => {
-  const [messages, setMessages] = useState(mockChatData.messages);
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
   const scrollAreaRef = useRef(null);
   const messagesEndRef = useRef(null);
 
