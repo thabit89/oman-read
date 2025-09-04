@@ -142,15 +142,15 @@ export const Chat = () => {
       </ScrollArea>
 
       {/* Message Input */}
-      <div className="bg-white border-t border-emerald-100 p-4">
-        <div className="flex gap-3 items-end">
+      <div className="bg-white border-t-2 border-emerald-200 p-4 shadow-lg sticky bottom-0">
+        <div className="flex gap-3 items-center max-w-4xl mx-auto">
           <div className="flex-1">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="اكتب رسالتك هنا..."
-              className="resize-none border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500 text-right"
+              className="h-12 text-right border-2 border-emerald-200 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 rounded-xl px-4 py-3 shadow-sm"
               style={{ direction: 'rtl' }}
               disabled={isTyping}
             />
@@ -158,10 +158,9 @@ export const Chat = () => {
           <Button 
             onClick={handleSendMessage}
             disabled={!newMessage.trim() || isTyping}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg transition-all duration-200"
-            size="icon"
+            className="h-12 w-12 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg transition-all duration-200 rounded-xl"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-5 w-5" />
           </Button>
         </div>
       </div>
