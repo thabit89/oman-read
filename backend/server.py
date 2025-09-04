@@ -54,6 +54,17 @@ class ChatResponse(BaseModel):
     timestamp: str
     has_web_search: bool = False
     model_used: Optional[str] = None
+    reliability_score: Optional[float] = None
+    confidence_level: Optional[str] = None
+
+class AddSourceRequest(BaseModel):
+    title: str
+    content: str
+    source_type: str  # book, article, poem, biography
+    author: Optional[str] = None
+    publication_date: Optional[str] = None
+    reliability_score: Optional[float] = 0.8
+    tags: Optional[List[str]] = None
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
