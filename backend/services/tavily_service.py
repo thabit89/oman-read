@@ -132,6 +132,30 @@ class TavilyAdvancedSearchService:
         
         return priority_domains
     
+    def _get_journalism_domains(self) -> List[str]:
+        """الحصول على النطاقات المتخصصة في الصحافة والمقالات الأدبية"""
+        journalism_domains = []
+        
+        # مواقع صحفية عُمانية موثوقة
+        journalism_domains.extend([
+            'omanobserver.om', 'omandaily.om', 'shabiba.com',
+            'alwatan.com', 'omanalaan.com', 'omansultanate.com',
+            'timesofoman.com', 'muscatdaily.com'
+        ])
+        
+        # مواقع حكومية ثقافية
+        journalism_domains.extend([
+            'moe.gov.om', 'heritage.gov.om', 'oman.om'
+        ])
+        
+        # مواقع أكاديمية ومجلات أدبية
+        journalism_domains.extend([
+            'jstor.org', 'academia.edu', 'researchgate.net',
+            'journals.omanstudies.om', 'omanliterature.org'
+        ])
+        
+        return journalism_domains
+    
     def _process_tavily_results(
         self, 
         search_response: Dict[str, Any], 
