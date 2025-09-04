@@ -175,6 +175,13 @@ class GhassanLLMService:
         
         return enhanced_message
     
+    def _add_conversation_context(self, message: str, conversation_context: str) -> str:
+        """إضافة سياق المحادثة للرسالة"""
+        if not conversation_context:
+            return message
+        
+        return f"{conversation_context}\n\nالسؤال الحالي: {message}"
+    
     def _add_analytical_framework(self, user_message: str) -> str:
         """إضافة إطار تحليلي حسب نوع السؤال"""
         analytical_context = ""
