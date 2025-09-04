@@ -12,8 +12,13 @@ logger = logging.getLogger(__name__)
 
 class GhassanLLMService:
     def __init__(self):
-        self.api_key = os.environ.get('EMERGENT_LLM_KEY')
-        if not self.api_key:
+        # استخدام مفتاح Claude الخاص للتحليل الأدبي المتقدم
+        self.anthropic_key = os.environ.get('ANTHROPIC_API_KEY')
+        self.emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        if not self.anthropic_key:
+            logger.warning("ANTHROPIC_API_KEY not found, using EMERGENT_LLM_KEY")
+        if not self.emergent_key:
             raise ValueError("EMERGENT_LLM_KEY not found in environment variables")
         
         # رسالة النظام المحدثة لغسان - أكثر دقة ونحوية
