@@ -8,12 +8,25 @@ import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { ChatService } from '../../services/chatService';
 
-// Function to format message text with HTML support
+// Function to format message text with improved readability
 const formatMessageText = (text) => {
   return text
+    // تحويل الأسطر الجديدة إلى مسافات أفضل
+    .replace(/\n\n/g, '<br><br>')
     .replace(/\n/g, '<br>')
+    // تحويل النجوم إلى bold
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // تحسين العناوين
+    .replace(/###\s*(.*?)$/gm, '<h3 class="text-lg font-bold text-emerald-700 mb-3 mt-4">$1</h3>')
+    .replace(/##\s*(.*?)$/gm, '<h2 class="text-xl font-bold text-emerald-800 mb-4 mt-5">$1</h2>')
+    .replace(/#\s*(.*?)$/gm, '<h1 class="text-2xl font-bold text-emerald-900 mb-5 mt-6">$1</h1>')
+    // تحسين القوائم
+    .replace(/•\s*(.*?)(?=\n|$)/g, '<li class="mb-2 text-gray-700">• $1</li>')
+    // تحسين الروابط
+    .replace(/https?:\/\/[^\s<]+/g, '<a href="$&" target="_blank" class="text-blue-600 underline hover:text-blue-800 font-medium break-all">$&</a>')
+    // إضافة مسافات بين الأقسام
+    .replace(/<br><strong>/g, '<br><br><strong>');
 };
 
 export const Chat = () => {
