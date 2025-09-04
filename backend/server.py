@@ -107,11 +107,11 @@ async def send_message(request: ChatMessageRequest):
         logging.error(f"خطأ في إرسال الرسالة: {e}")
         raise HTTPException(status_code=500, detail=f"خطأ في معالجة الرسالة: {str(e)}")
 
-@api_router.post("/contact")
-async def submit_contact_form(request: ContactRequest):
-    """إرسال نموذج الاتصال"""
+@api_router.post("/contact/send")
+async def send_contact_message(request: ContactRequest):
+    """إرسال رسالة الاتصال"""
     try:
-        # حفظ رسالة الاتصال في قاعدة البيانات
+        # حفظ في قاعدة البيانات
         contact_data = {
             'contact_id': str(uuid.uuid4()),
             'name': request.name,
@@ -126,7 +126,7 @@ async def submit_contact_form(request: ContactRequest):
         
         return {
             'success': True,
-            'message': 'تم إرسال رسالتك بنجاح',
+            'message': 'تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.',
             'contact_id': contact_data['contact_id']
         }
     except Exception as e:
