@@ -9,6 +9,7 @@ from .llm_service import ghassan_llm_service
 from .claude_service import claude_direct_service
 from .tavily_service import tavily_search_service
 from data.omani_knowledge_base import OMANI_LITERATURE_KNOWLEDGE_BASE, EXTRACTED_KNOWLEDGE
+from data.omani_curriculum import OMANI_ARABIC_CURRICULUM
 
 logger = logging.getLogger(__name__)
 
