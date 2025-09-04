@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import uuid
 from datetime import datetime
+import shutil
 
 # استيراد خدمات جديدة
 from services.chat_service import ChatService
