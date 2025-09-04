@@ -60,18 +60,22 @@ export class ChatService {
     }
   }
   
-  static async testConnection() {
+  static async sendAdvancedMessage(message, sessionId = null) {
     try {
-      const response = await axios.get(`${API}/`);
+      const response = await axios.post(`${API}/chat/message-advanced`, {
+        message,
+        session_id: sessionId
+      });
+      
       return {
         success: true,
         data: response.data
       };
     } catch (error) {
-      console.error('خطأ في الاتصال:', error);
+      console.error('خطأ في إرسال الرسالة المتقدمة:', error);
       return {
         success: false,
-        error: 'خطأ في الاتصال بالخادم'
+        error: error.response?.data?.detail || 'حدث خطأ في الإرسال'
       };
     }
   }
