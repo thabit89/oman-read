@@ -231,6 +231,22 @@ class ChatService:
         
         return standard_results
     
+    def _build_conversation_context(self, recent_messages: List[Dict[str, Any]]) -> str:
+        """بناء سياق المحادثة من الرسائل السابقة"""
+        if not recent_messages:
+            return ""
+        
+        context = "--- سياق المحادثة السابقة ---\n"
+        
+        for msg in recent_messages[-4:]:  # آخر 4 رسائل فقط
+            sender = "المستخدم" if msg['sender'] == 'user' else "غسان"
+            context += f"{sender}: {msg['text'][:100]}...\n"
+        
+        context += "--- نهاية السياق ---\n"
+        context += "**تذكر:** استخدم هذا السياق لتجنب تكرار المعلومات وربط الأسئلة الجديدة بما سبق.\n"
+        
+        return context
+    
     def _format_message(self, msg: Dict[str, Any]) -> Dict[str, Any]:
         """تنسيق الرسالة للإرسال للعميل"""
         return {
