@@ -80,31 +80,37 @@ class TavilyAdvancedSearchService:
             }
     
     def _enhance_query_for_omani_literature(self, query: str) -> str:
-        """تحسين استعلام البحث للتركيز على الأدب العُماني"""
+        """تحسين استعلام البحث للتركيز على المقابلات والمقالات المنشورة"""
         
-        # إضافة كلمات مفتاحية عُمانية
-        omani_terms = [
-            "عُمان", "عُماني", "Oman", "Omani literature",
-            "سلطنة عُمان", "الأدب العُماني", "الثقافة العُمانية"
+        # إضافة كلمات مفتاحية لإيجاد المقابلات والمقالات
+        interview_terms = [
+            "مقابلة مع", "حوار مع", "لقاء مع", "interview with",
+            "مقال عن", "تقرير عن", "دراسة عن", "article about",
+            "صحيفة", "مجلة", "موقع أدبي", "منشور"
         ]
         
-        # إضافة مصطلحات أدبية لتركيز البحث
-        literary_terms = [
-            "أدب", "شعر", "رواية", "قصة", "مسرحية", "نقد أدبي",
-            "literature", "poetry", "novel", "story", "criticism"
+        # مواقع موثوقة تنشر مقابلات ومقالات أدبية
+        reliable_sources = [
+            "site:omanobserver.om", "site:omandaily.om", "site:shabiba.com",
+            "site:alwatan.com", "site:omanalaan.com", "site:omansultanate.com",
+            "site:moe.gov.om", "site:heritage.gov.om",
+            "interview OR مقابلة OR حوار OR لقاء",
+            "article OR مقال OR تقرير OR دراسة"
         ]
         
         # تنظيف الاستعلام من الكلمات غير المفيدة
-        stop_words = ['أريد', 'أعطني', 'قل لي', 'أخبرني']
+        stop_words = ['أريد', 'أعطني', 'قل لي', 'أخبرني عن']
         cleaned_query = query
         for word in stop_words:
             cleaned_query = cleaned_query.replace(word, '')
         
-        # بناء استعلام محسن
-        enhanced = f"{cleaned_query} الأدب العُماني OR Omani literature OR عُمان أدب"
+        # بناء استعلام محسن يركز على المحتوى المنشور
+        enhanced = f'{cleaned_query} الأدب العُماني ("مقابلة" OR "حوار" OR "مقال" OR "interview" OR "article")'
         
-        # إضافة مصطلحات أكاديمية للحصول على مصادر موثوقة
-        enhanced += " site:edu OR site:gov.om OR academic OR journal OR research"
+        # إضافة مصطلحات للحصول على مصادر صحفية وأكاديمية موثوقة
+        enhanced += f' ({" OR ".join(reliable_sources[:5])})'
+        
+        logger.info(f"استعلام Tavily محسن: {enhanced}")
         
         return enhanced.strip()
     
