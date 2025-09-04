@@ -174,13 +174,37 @@ class ChatService:
         message_lower = message.lower()
         return any(indicator in message_lower for indicator in search_indicators)
     
-    def _format_message(self, msg: Dict[str, Any]) -> Dict[str, Any]:
-        """تنسيق الرسالة للإرسال للعميل"""
-        return {
-            'id': msg['_id'],
-            'text': msg['text'],
-            'sender': msg['sender'],
-            'timestamp': msg['timestamp'].isoformat(),
-            'hasWebSearch': msg.get('metadata', {}).get('has_web_search', False),
-            'modelUsed': msg.get('metadata', {}).get('model_used')
-        }
+    def _needs_advanced_literary_analysis(self, message: str) -> bool:
+        """تحديد إذا كانت الرسالة تحتاج تحليل أدبي متقدم"""
+        advanced_keywords = [
+            'تحليل', 'نقد', 'إعراب', 'بلاغة', 'عروض', 'بحر شعري', 
+            'قافية', 'استعارة', 'كناية', 'مجاز', 'تشبيه',
+            'بنية', 'أسلوب', 'نظرية', 'منهج', 'مدرسة أدبية',
+            'نحو', 'صرف', 'بديع', 'بيان', 'معاني'
+        ]
+        
+        return any(keyword in message.lower() for keyword in advanced_keywords)
+    
+    def _should_use_claude_analysis(self, message: str) -> bool:
+        """تحديد متى نستخدم Claude المباشر"""
+        # استخدم Claude للتحليل الأدبي، النحوي، والبلاغي
+        claude_specific = [
+            'تحليل', 'نقد', 'إعراب', 'بلاغة', 'عروض',
+            'نحو', 'صرف', 'شاعرية', 'أسلوب', 'بنية',
+            'نظرية', 'منهج', 'دراسة أدبية'
+        ]
+        
+        return any(keyword in message.lower() for keyword in claude_specific)
+    
+    def _format_search_context(self, search_results: List[Dict[str, Any]]) -> str:
+        """تنسيق نتائج البحث لـ Claude"""
+        if not search_results:
+            return ""
+        
+        context = "--- معلومات من المصادر الموثوقة ---\n"
+        for result in search_results:
+            context += f"• {result.get('title', 'N/A')}\n"
+            context += f"المصدر: {result.get('source', 'N/A')}\n"
+            context += f"المحتوى: {result.get('content', '')[:200]}...\n\n"
+        
+        return context
