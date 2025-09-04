@@ -271,7 +271,7 @@ export const Chat = () => {
               <div className="flex items-end gap-2 max-w-xs">
                 <Avatar className="h-12 w-12 ring-2 ring-white/60 shadow-lg transition-all duration-200 group-hover:scale-105">
                   <AvatarImage 
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face&auto=format&q=80"
+                    src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=150&h=150&fit=crop&crop=face&auto=format&q=80"
                     alt="غسان" 
                     className="object-cover"
                   />
