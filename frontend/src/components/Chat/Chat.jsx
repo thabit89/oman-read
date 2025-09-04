@@ -156,11 +156,15 @@ export const Chat = () => {
           <div className="px-6 py-4">
             <div className="flex items-center gap-4">
               
-              {/* Avatar with Glow Effect */}
+              {/* Avatar with Glow Effect - Enhanced */}
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full blur animate-pulse"></div>
-                <Avatar className="relative h-14 w-14 ring-2 ring-white/50 shadow-lg">
-                  <AvatarImage src="/ghassan-avatar.jpg" alt="غسان" />
+                <Avatar className="relative h-18 w-18 ring-2 ring-emerald-200 shadow-lg hover:scale-105 transition-all duration-200">
+                  <AvatarImage 
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face&auto=format&q=80"
+                    alt="غسان - المساعد الأدبي العُماني" 
+                    className="object-cover"
+                  />
                   <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-bold text-lg">
                     غ
                   </AvatarFallback>
