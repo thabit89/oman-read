@@ -202,7 +202,7 @@ export const Chat = () => {
               placeholder="اكتب رسالتك هنا..."
               className="h-12 text-right border-2 border-emerald-200 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 rounded-xl px-4 py-3 shadow-sm"
               style={{ direction: 'rtl' }}
-              disabled={isTyping}
+              disabled={!newMessage.trim() || isTyping || isSearching}
             />
           </div>
           <Button 
