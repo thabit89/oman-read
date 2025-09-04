@@ -129,6 +129,12 @@ export const Chat = () => {
                   <p className="text-sm leading-relaxed" style={{ direction: 'rtl', textAlign: 'right' }}>
                     {message.text}
                   </p>
+                  {message.hasWebSearch && (
+                    <div className="flex items-center gap-1 mt-2 text-xs text-emerald-600">
+                      <Globe className="h-3 w-3" />
+                      <span>تم البحث عبر الإنترنت</span>
+                    </div>
+                  )}
                   <p className={`text-xs mt-1 ${
                     message.sender === 'user' ? 'text-emerald-100' : 'text-emerald-500'
                   }`}>
