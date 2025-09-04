@@ -216,24 +216,78 @@ async def get_knowledge_stats():
 #         logging.error(f"خطأ في إضافة العمل: {e}")
 #         raise HTTPException(status_code=500, detail=f"خطأ في الإضافة: {str(e)}")
 
-@api_router.post("/collect/simple")
-async def simple_collect_sources():
-    """جمع بسيط للمصادر من المقابلات والمقالات"""
+@api_router.post("/upload/avatar")
+async def upload_ghassan_avatar(image: UploadFile = File(...), type: str = "avatar", name: str = "ghassan-avatar"):
+    """رفع صورة avatar لغسان"""
     try:
-        results = await simple_collector.bulk_collect_all_authors()
+        # التحقق من نوع الملف
+        if not image.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="يجب أن يكون الملف صورة")
         
-        # حفظ النتائج في قاعدة البيانات للاستفادة منها لاحقاً
-        await db.collected_sources.insert_one({
-            'collection_id': str(__import__('uuid').uuid4()),
-            'results': results,
-            'collection_date': datetime.utcnow(),
-            'status': 'completed' if results.get('collection_completed') else 'failed'
-        })
+        # التحقق من حجم الملف (5MB)
+        content = await image.read()
+        if len(content) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="حجم الصورة كبير جداً (أقل من 5MB)")
         
-        return results
+        # إنشاء اسم ملف فريد
+        file_extension = image.filename.split(".")[-1].lower()
+        filename = f"ghassan-avatar.{file_extension}"
+        file_path = UPLOADS_DIR / filename
+        
+        # حفظ الصورة
+        with open(file_path, "wb") as buffer:
+            buffer.write(content)
+        
+        # إنشاء رابط للوصول للصورة
+        image_url = f"/uploads/{filename}"
+        
+        logger.info(f"تم رفع صورة غسان: {filename}")
+        
+        return {
+            "success": True,
+            "filename": filename,
+            "image_url": image_url,
+            "message": "تم رفع صورة غسان بنجاح",
+            "file_size": len(content)
+        }
+        
     except Exception as e:
-        logging.error(f"خطأ في الجمع البسيط: {e}")
-        raise HTTPException(status_code=500, detail=f"خطأ في الجمع: {str(e)}")
+        logger.error(f"خطأ في رفع الصورة: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في رفع الصورة: {str(e)}")
+
+@api_router.get("/avatar/current")
+async def get_current_avatar():
+    """الحصول على صورة غسان الحالية"""
+    try:
+        # البحث عن صور غسان في مجلد uploads
+        avatar_files = []
+        for ext in ['jpg', 'jpeg', 'png', 'webp']:
+            avatar_path = UPLOADS_DIR / f"ghassan-avatar.{ext}"
+            if avatar_path.exists():
+                avatar_files.append({
+                    'filename': f"ghassan-avatar.{ext}",
+                    'url': f"/uploads/ghassan-avatar.{ext}",
+                    'size': avatar_path.stat().st_size,
+                    'modified': datetime.fromtimestamp(avatar_path.stat().st_mtime).isoformat()
+                })
+        
+        if avatar_files:
+            # إرجاع أحدث صورة
+            latest_avatar = max(avatar_files, key=lambda x: x['modified'])
+            return {
+                "success": True,
+                "current_avatar": latest_avatar,
+                "all_avatars": avatar_files
+            }
+        else:
+            return {
+                "success": False,
+                "message": "لا توجد صورة حالية لغسان"
+            }
+            
+    except Exception as e:
+        logger.error(f"خطأ في جلب الصورة الحالية: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في جلب الصورة: {str(e)}")
 
 @api_router.get("/collect/author/{author_name}")
 async def collect_for_specific_author(author_name: str):
