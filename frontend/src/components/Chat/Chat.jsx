@@ -225,9 +225,13 @@ export const Chat = () => {
             >
               <div className="flex items-end gap-2 max-w-xs sm:max-w-md lg:max-w-lg">
                 {message.sender === 'ghassan' && (
-                  <Avatar className="h-8 w-8 ring-2 ring-emerald-200">
-                    <AvatarImage src="/ghassan-avatar.jpg" alt="غسان" />
-                    <AvatarFallback className="bg-emerald-500 text-white text-sm">
+                  <Avatar className="h-12 w-12 ring-2 ring-white/60 shadow-lg transition-all duration-200 group-hover:scale-105">
+                    <AvatarImage 
+                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face&auto=format&q=80"
+                      alt="غسان" 
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-sm font-semibold">
                       غ
                     </AvatarFallback>
                   </Avatar>
