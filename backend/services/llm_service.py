@@ -191,6 +191,13 @@ class GhassanLLMService:
         
         return f"{conversation_context}\n\nالسؤال الحالي: {message}"
     
+    def _add_educational_context(self, message: str, curriculum_context: str) -> str:
+        """إضافة السياق التعليمي للرسالة"""
+        if not curriculum_context:
+            return message
+        
+        return f"{message}\n\n{curriculum_context}"
+    
     def _add_analytical_framework(self, user_message: str) -> str:
         """إضافة إطار تحليلي متقدم حسب نوع السؤال"""
         analytical_context = """
