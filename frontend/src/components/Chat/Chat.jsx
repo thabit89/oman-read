@@ -101,8 +101,7 @@ export const Chat = () => {
           text: response.data.text,
           sender: 'ghassan',
           timestamp: response.data.timestamp,
-          hasWebSearch: response.data.has_web_search,
-          modelUsed: response.data.model_used
+          hasWebSearch: response.data.has_web_search
         };
         
         setMessages(prev => [...prev, aiResponse]);
