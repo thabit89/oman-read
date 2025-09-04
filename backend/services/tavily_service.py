@@ -198,6 +198,79 @@ class TavilyAdvancedSearchService:
         
         return processed_results
     
+    def _filter_for_journalism_content(
+        self, 
+        search_response: Dict[str, Any], 
+        original_query: str
+    ) -> List[Dict[str, Any]]:
+        """تصفية النتائج للتركيز على المقابلات والمقالات الصحفية"""
+        
+        raw_results = search_response.get('results', [])
+        journalism_results = []
+        
+        # كلمات مفتاحية تدل على المحتوى الصحفي والمقابلات
+        journalism_keywords = [
+            'مقابلة', 'حوار', 'لقاء', 'interview', 'مقال', 'article',
+            'تقرير', 'report', 'دراسة', 'study', 'صحيفة', 'newspaper',
+            'مجلة', 'magazine', 'منشور', 'published', 'نشر', 'publish'
+        ]
+        
+        for result in raw_results:
+            content = (result.get('content', '') + ' ' + result.get('title', '')).lower()
+            url = result.get('url', '').lower()
+            
+            # تقييم المحتوى الصحفي
+            journalism_score = 0.0
+            
+            # نقاط للكلمات المفتاحية الصحفية
+            for keyword in journalism_keywords:
+                if keyword.lower() in content:
+                    journalism_score += 0.2
+            
+            # نقاط إضافية للمواقع الصحفية الموثوقة
+            trusted_news_sites = ['observer', 'daily', 'shabiba', 'watan', 'times']
+            for site in trusted_news_sites:
+                if site in url:
+                    journalism_score += 0.3
+            
+            # تجنب المحتوى من وسائل التواصل الاجتماعي
+            social_media_sites = ['facebook', 'twitter', 'instagram', 'tiktok']
+            if any(site in url for site in social_media_sites):
+                journalism_score -= 0.5
+            
+            # إضافة النتيجة إذا كانت تحتوي على محتوى صحفي
+            if journalism_score > 0.2:
+                # حساب درجة الصلة العامة
+                relevance_score = self._calculate_relevance_score(result, original_query)
+                
+                processed_result = {
+                    'title': result.get('title', ''),
+                    'content': result.get('content', '')[:800],  # محتوى أطول للمقالات
+                    'url': result.get('url', ''),
+                    'score': result.get('score', 0),
+                    'relevance_score': relevance_score,
+                    'journalism_score': journalism_score,
+                    'source_type': self._identify_source_type(result.get('url', '')),
+                    'reliability_rating': self._rate_source_reliability(result.get('url', '')),
+                    'published_date': result.get('published_date'),
+                    'raw_content': result.get('raw_content', '')[:400]  # محتوى خام أطول
+                }
+                
+                # إضافة تحليل المحتوى للكلمات المفتاحية
+                processed_result['omani_keywords'] = self._extract_omani_keywords(
+                    processed_result['content']
+                )
+                
+                journalism_results.append(processed_result)
+        
+        # ترتيب النتائج حسب النقاط الصحفية والصلة
+        journalism_results.sort(
+            key=lambda x: (x['journalism_score'], x['relevance_score'], x['reliability_rating']), 
+            reverse=True
+        )
+        
+        return journalism_results[:10]  # أفضل 10 نتائج
+    
     def _calculate_relevance_score(self, result: Dict[str, Any], query: str) -> float:
         """حساب درجة صلة النتيجة بالاستعلام والأدب العُماني"""
         
