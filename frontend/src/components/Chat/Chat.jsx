@@ -149,7 +149,26 @@ export const Chat = () => {
             </div>
           ))}
           
-          {isTyping && (
+          {isSearching && (
+            <div className="flex justify-start">
+              <div className="flex items-end gap-2 max-w-xs">
+                <Avatar className="h-8 w-8 ring-2 ring-emerald-200">
+                  <AvatarImage src="/ghassan-avatar.jpg" alt="غسان" />
+                  <AvatarFallback className="bg-emerald-500 text-white text-sm">
+                    غ
+                  </AvatarFallback>
+                </Avatar>
+                <div className="bg-white border border-emerald-100 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <Search className="h-4 w-4 text-emerald-500 animate-pulse" />
+                    <span className="text-sm text-emerald-700">يبحث عبر الإنترنت...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {isTyping && !isSearching && (
             <div className="flex justify-start">
               <div className="flex items-end gap-2 max-w-xs">
                 <Avatar className="h-8 w-8 ring-2 ring-emerald-200">
