@@ -109,28 +109,43 @@ class InformationVerificationService:
         return score
     
     def _check_specific_information(self, text: str) -> float:
-        """فحص المعلومات المحددة جداً"""
-        # البحث عن معلومات محددة جداً قد تكون مختلقة
-        specific_patterns = [
-            r'\d{4}م',  # تواريخ محددة
-            r'\d{4}هـ',
-            r'\d+ عاماً',  # أعمار محددة
-            r'\d+ كتاباً',  # أرقام كتب محددة
-            r'في يوم \d+',  # تواريخ يومية محددة
+        """فحص المعلومات المحددة جداً مع تركيز على المؤلفات"""
+        warning_score = 1.0
+        
+        # أنماط مشبوهة للكتب والمؤلفات المختلقة
+        book_patterns = [
+            r'"[^"]{5,30}"',  # أي عنوان كتاب بين قوسين
+            r'ديوان "[^"]+?"',  # دواوين محددة
+            r'رواية "[^"]+?"',  # روايات محددة
+            r'كتاب "[^"]+?"',  # كتب محددة
+            r'مجموعة "[^"]+?"',  # مجموعات محددة
         ]
         
-        specific_count = 0
-        for pattern in specific_patterns:
+        book_mentions = 0
+        for pattern in book_patterns:
             matches = re.findall(pattern, text)
-            specific_count += len(matches)
+            book_mentions += len(matches)
+            if matches:
+                logger.warning(f"كتب مشبوهة مذكورة: {matches}")
         
-        # توازن: بعض التحديد طبيعي، لكن الكثير منه مشبوه
-        if specific_count == 0:
-            return 0.7  # لا توجد تفاصيل محددة
-        elif specific_count <= 3:
-            return 0.9  # تفاصيل معقولة
-        else:
-            return 0.3  # تفاصيل كثيرة مشبوهة
+        # إذا ذُكرت كتب محددة، اخفض النتيجة بشدة
+        if book_mentions > 0:
+            warning_score = 0.2  # نتيجة منخفضة جداً
+            logger.error(f"تم ذكر {book_mentions} عنوان كتاب محدد - مؤشر هلوسة قوي")
+        
+        # فحص التواريخ المحددة جداً
+        specific_dates = re.findall(r'عام \d{4}|سنة \d{4}|\d{4}م|\d{4}هـ', text)
+        if len(specific_dates) > 2:
+            warning_score -= 0.3
+            logger.warning(f"تواريخ محددة كثيرة: {specific_dates}")
+        
+        # فحص الأرقام المحددة (عدد الكتب، الصفحات، إلخ)
+        specific_numbers = re.findall(r'\d+ (كتاباً|مؤلفاً|عملاً|ديواناً|رواية)', text)
+        if len(specific_numbers) > 1:
+            warning_score -= 0.4
+            logger.warning(f"أرقام محددة مشبوهة: {specific_numbers}")
+        
+        return max(0.0, warning_score)
     
     async def _check_names_and_entities(self, text: str) -> float:
         """فحص الأسماء والكيانات المذكورة"""
