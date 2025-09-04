@@ -77,36 +77,6 @@ export const GlobalHeader = ({ currentPage = 'chat' }) => {
             </Button>
             
             <Button
-              variant={currentPage === 'knowledge' ? 'default' : 'ghost'}
-              size="sm"
-              asChild
-              className={currentPage === 'knowledge' 
-                ? 'bg-blue-600 text-white' 
-                : 'text-blue-600 hover:bg-blue-50'
-              }
-            >
-              <a href="/knowledge" className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4" />
-                <span className="hidden md:inline">المصادر</span>
-              </a>
-            </Button>
-            
-            <Button
-              variant={currentPage === 'advanced' ? 'default' : 'ghost'}
-              size="sm"
-              asChild
-              className={currentPage === 'advanced' 
-                ? 'bg-indigo-600 text-white' 
-                : 'text-indigo-600 hover:bg-indigo-50'
-              }
-            >
-              <a href="/advanced" className="flex items-center gap-2">
-                <Brain className="h-4 w-4" />
-                <span className="hidden md:inline">متقدم</span>
-              </a>
-            </Button>
-            
-            <Button
               variant={currentPage === 'contact' ? 'default' : 'ghost'}
               size="sm"
               asChild
