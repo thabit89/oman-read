@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Mail, Send, MapPin, Phone, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { GlobalHeader } from '../Layout/GlobalHeader';
 
 export const Contact = () => {
   const [contactForm, setContactForm] = useState({
