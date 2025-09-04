@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { mockChatData } from '../../data/mock';
+import { ChatService } from '../../services/chatService';
 
 export const Chat = () => {
   const [messages, setMessages] = useState(mockChatData.messages);
