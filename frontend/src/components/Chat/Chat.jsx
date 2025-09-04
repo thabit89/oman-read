@@ -204,28 +204,6 @@ export const Chat = () => {
                   variant="ghost"
                   size="sm"
                   asChild
-                  className="text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
-                >
-                  <a href="/knowledge" title="إدارة المصادر">
-                    <BookOpen className="h-5 w-5" />
-                  </a>
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700"
-                >
-                  <a href="/advanced" title="النظام المتقدم">
-                    <Brain className="h-5 w-5" />
-                  </a>
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
                   className="text-orange-600 hover:bg-orange-50 hover:text-orange-700"
                 >
                   <a href="/contact" title="تواصل معنا">
