@@ -338,6 +338,70 @@ class ChatService:
         
         return None
     
+    def _needs_external_links_fallback(self, response: str, query: str) -> bool:
+        """تحديد إذا كان الرد يحتاج روابط خارجية بديلة"""
+        
+        # عبارات تدل على عدم توفر معلومات كافية
+        fallback_indicators = [
+            "لا أملك معلومات",
+            "لا أعرف",
+            "غير متوفرة",
+            "أحتاج للتحقق",
+            "من المفيد البحث",
+            "مصادر إضافية",
+            "معلومات محدودة"
+        ]
+        
+        response_lower = response.lower()
+        has_insufficient_info = any(indicator in response_lower for indicator in fallback_indicators)
+        
+        # أيضاً إذا كان الرد قصير جداً (أقل من 100 حرف)
+        is_too_short = len(response.strip()) < 100
+        
+        return has_insufficient_info or is_too_short
+    
+    async def _generate_external_links(self, query: str) -> str:
+        """توليد روابط خارجية مفيدة عند عدم توفر إجابة مباشرة"""
+        
+        try:
+            # تحسين استعلام البحث للحصول على مصادر موثوقة
+            enhanced_query = f"{query} site:nizwa.om OR site:omandaily.om OR site:moe.gov.om OR site:heritage.gov.om OR site:squ.edu.om"
+            
+            # البحث باستخدام Tavily
+            search_results = await tavily_search_service.search_omani_literature_advanced(
+                enhanced_query, 
+                max_results=6
+            )
+            
+            if not search_results.get('results'):
+                return ""
+            
+            # تنسيق الروابط
+            links_text = "\n\n📚 **لم تتوفر إجابة مباشرة، لكن إليك مصادر موثوقة ذات صلة:**\n\n"
+            
+            for i, result in enumerate(search_results['results'][:5], 1):
+                title = result.get('title', 'مصدر مفيد')
+                url = result.get('url', '')
+                source_type = result.get('source_type', 'مصدر')
+                
+                # تنظيف العنوان وتقصيره إذا كان طويلاً
+                if len(title) > 60:
+                    title = title[:57] + "..."
+                
+                # إضافة رمز حسب نوع المصدر
+                icon = "📖" if "academic" in source_type else "📰" if "news" in source_type else "🔗"
+                
+                links_text += f"• {icon} **{title}**\n"
+                links_text += f"  {url}\n\n"
+            
+            links_text += "💡 **نصيحة**: اضغط على الروابط للحصول على معلومات مفصلة من مصادر موثوقة."
+            
+            return links_text
+            
+        except Exception as e:
+            logger.error(f"خطأ في توليد الروابط الخارجية: {e}")
+            return ""
+    
     def _format_message(self, msg: Dict[str, Any]) -> Dict[str, Any]:
         """تنسيق الرسالة للإرسال للعميل"""
         return {
