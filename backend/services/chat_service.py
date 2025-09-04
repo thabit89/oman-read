@@ -7,7 +7,6 @@ import logging
 from .search_service import web_search_service
 from .llm_service import ghassan_llm_service
 from .claude_service import claude_direct_service
-from .langchain_service import advanced_ghassan_service
 
 logger = logging.getLogger(__name__)
 
