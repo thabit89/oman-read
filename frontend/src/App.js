@@ -5,6 +5,7 @@ import { EnhancedChat } from "./components/Chat/EnhancedChat";
 import { Chat } from "./components/Chat/Chat";
 import { KnowledgeManager } from "./components/Knowledge/KnowledgeManager";
 import { AdvancedKnowledgeManager } from "./components/Knowledge/AdvancedKnowledgeManager";
+import { ImageUploader } from "./components/Upload/ImageUploader";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/enhanced" element={<EnhancedChat />} />
           <Route path="/knowledge" element={<KnowledgeManager />} />
           <Route path="/advanced" element={<AdvancedKnowledgeManager />} />
+          <Route path="/upload" element={<ImageUploader />} />
         </Routes>
       </BrowserRouter>
     </div>
