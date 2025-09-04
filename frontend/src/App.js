@@ -6,6 +6,8 @@ import { Chat } from "./components/Chat/Chat";
 import { KnowledgeManager } from "./components/Knowledge/KnowledgeManager";
 import { AdvancedKnowledgeManager } from "./components/Knowledge/AdvancedKnowledgeManager";
 import { ImageUploader } from "./components/Upload/ImageUploader";
+import { AudioBooks } from "./components/AudioBooks/AudioBooks";
+import { Contact } from "./components/Contact/Contact";
 
 function App() {
   return (
