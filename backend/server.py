@@ -287,7 +287,62 @@ async def get_current_avatar():
             
     except Exception as e:
         logger.error(f"خطأ في جلب الصورة الحالية: {e}")
-        raise HTTPException(status_code=500, detail=f"خطأ في جلب الصورة: {str(e)}")
+@api_router.post("/collect/simple")
+async def simple_collect_sources():
+    """جمع بسيط للمصادر من المقابلات والمقالات"""
+    try:
+        results = await simple_collector.bulk_collect_all_authors()
+        
+        # حفظ النتائج في قاعدة البيانات للاستفادة منها لاحقاً
+        await db.collected_sources.insert_one({
+            'collection_id': str(uuid.uuid4()),
+            'results': results,
+            'collection_date': datetime.utcnow(),
+            'status': 'completed' if results.get('collection_completed') else 'failed'
+        })
+        
+        return results
+    except Exception as e:
+        logging.error(f"خطأ في الجمع البسيط: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في الجمع: {str(e)}")
+
+@api_router.get("/collect/author/{author_name}")
+async def collect_for_specific_author(author_name: str):
+    """جمع مصادر لمؤلف محدد"""
+    try:
+        results = await simple_collector.collect_sources_for_author(author_name)
+        
+        # حفظ نتائج هذا المؤلف
+        await db.author_sources.insert_one({
+            'author_name': author_name,
+            'sources': results,
+            'collection_date': datetime.utcnow()
+        })
+        
+        return results
+    except Exception as e:
+        logging.error(f"خطأ في جمع مصادر المؤلف: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في الجمع: {str(e)}")
+
+@api_router.get("/sources/stats")
+async def get_sources_stats():
+    """إحصائيات المصادر المجمعة"""
+    try:
+        total_collections = await db.collected_sources.count_documents({})
+        total_authors = await db.author_sources.count_documents({})
+        
+        # آخر عمليات الجمع
+        recent_collections = await db.collected_sources.find().sort('collection_date', -1).limit(3).to_list(3)
+        
+        return {
+            'total_collections': total_collections,
+            'total_author_collections': total_authors,
+            'recent_collections': recent_collections,
+            'last_updated': datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logging.error(f"خطأ في إحصائيات المصادر: {e}")
+        return {'error': str(e)}
 
 @api_router.get("/collect/author/{author_name}")
 async def collect_for_specific_author(author_name: str):
