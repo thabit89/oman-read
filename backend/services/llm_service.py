@@ -66,7 +66,8 @@ class GhassanLLMService:
         user_message: str, 
         search_results: List[Dict[str, Any]] = None,
         session_id: str = None,
-        use_claude: bool = False
+        use_claude: bool = False,
+        conversation_context: str = ""
     ) -> Dict[str, Any]:
         """توليد رد مع نتائج البحث"""
         try:
