@@ -251,9 +251,13 @@ export const Chat = () => {
                       : 'bg-white text-emerald-900 border border-emerald-100 rounded-bl-sm'
                   }`}
                 >
-                  <p className="text-sm leading-relaxed" style={{ direction: 'rtl', textAlign: 'right' }}>
-                    {message.text}
-                  </p>
+                  <div 
+                    className="text-sm leading-relaxed"
+                    style={{ direction: 'rtl', textAlign: 'right' }}
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatMessageText(message.text)
+                    }}
+                  />
                   {message.hasWebSearch && (
                     <div className="flex items-center gap-1 mt-2 text-xs text-emerald-600">
                       <Globe className="h-3 w-3" />
