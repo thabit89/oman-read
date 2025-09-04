@@ -41,8 +41,13 @@ class ChatService:
             search_results = []
             
             if needs_search:
-                logger.info(f"رسالة تحتاج بحث: {message_text}")
-                search_results = await web_search_service.search_omani_literature(message_text)
+                logger.info(f"رسالة تحتاج بحث متقدم بـ Tavily: {message_text}")
+                
+                # استخدام Tavily للبحث المتقدم
+                tavily_results = await tavily_search_service.search_omani_literature_advanced(message_text)
+                
+                # تحويل نتائج Tavily لصيغة موحدة
+                search_results = self._convert_tavily_to_standard_format(tavily_results)
             
             # تحديد إذا كان يحتاج تحليل أدبي متقدم
             needs_advanced_analysis = self._needs_advanced_literary_analysis(message_text)
