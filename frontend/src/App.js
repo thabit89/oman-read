@@ -11,8 +11,8 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<EnhancedChat />} />
-          <Route path="/simple" element={<Chat />} />
+          <Route path="/" element={<Chat />} />
+          <Route path="/enhanced" element={<EnhancedChat />} />
           <Route path="/knowledge" element={<KnowledgeManager />} />
           <Route path="/advanced" element={<AdvancedKnowledgeManager />} />
         </Routes>
