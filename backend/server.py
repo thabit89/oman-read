@@ -388,6 +388,48 @@ async def get_sources_stats():
         logging.error(f"خطأ في إحصائيات المصادر: {e}")
         return {'error': str(e)}
 
+@api_router.post("/extract/nizwa")
+async def extract_nizwa_content():
+    """استخراج محتوى من أرشيف مجلة نزوى"""
+    try:
+        results = await nizwa_extractor.extract_sample_issues()
+        
+        if results['successfully_extracted'] > 0:
+            # تنسيق وحفظ في قاعدة البيانات
+            formatted_content = nizwa_extractor.format_for_knowledge_base(results)
+            
+            await db.nizwa_extractions.insert_one({
+                'extraction_id': str(uuid.uuid4()),
+                'results': results,
+                'formatted_content': formatted_content,
+                'extraction_date': datetime.utcnow(),
+                'status': 'completed'
+            })
+        
+        return results
+    except Exception as e:
+        logging.error(f"خطأ في استخراج نزوى: {e}")
+        raise HTTPException(status_code=500, detail=f"خطأ في الاستخراج: {str(e)}")
+
+@api_router.get("/knowledge/nizwa-stats")
+async def get_nizwa_extraction_stats():
+    """إحصائيات استخراج مجلة نزوى"""
+    try:
+        total_extractions = await db.nizwa_extractions.count_documents({})
+        latest_extraction = await db.nizwa_extractions.find_one(
+            {}, sort=[('extraction_date', -1)]
+        )
+        
+        return {
+            'total_extractions': total_extractions,
+            'latest_extraction': latest_extraction,
+            'available_issues': 123,  # من الأرشيف المشاهد
+            'extraction_method': 'automated_pdf_processing'
+        }
+    except Exception as e:
+        logging.error(f"خطأ في إحصائيات نزوى: {e}")
+        return {'error': str(e)}
+
 @api_router.get("/chat/history/{session_id}")
 async def get_chat_history(session_id: str, limit: int = 50):
     """جلب تاريخ المحادثات لجلسة معينة"""
