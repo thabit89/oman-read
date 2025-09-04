@@ -14,11 +14,7 @@ from datetime import datetime
 from services.chat_service import ChatService
 from services.knowledge_service import OmaniLiteratureKnowledgeBase
 from services.verification_service import information_verifier
-# من services.rag_service import AdvancedRAGService
-# من services.enhanced_ghassan import EnhancedGhassanService
-# من services.embeddings_service import EmbeddingsService
-# من services.academic_collector import academic_collector
-# من models.literature_models import Author, LiteraryWork, LiteraryCategory, LiteraryStyle
+from services.simple_collector import simple_collector
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
