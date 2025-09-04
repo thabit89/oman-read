@@ -82,6 +82,16 @@ class ChatService:
                 conversation_context=conversation_context  # إضافة السياق
             )
             
+            # التحقق إذا كان الرد يحتاج روابط خارجية بديلة
+            needs_external_links = self._needs_external_links_fallback(llm_response['text'], message_text)
+            
+            if needs_external_links:
+                logger.info(f"البحث عن روابط خارجية بديلة: {message_text}")
+                external_links = await self._generate_external_links(message_text)
+                if external_links:
+                    llm_response['text'] += "\n\n" + external_links
+                    llm_response['has_external_links'] = True
+            
             # حفظ رد غسان
             ghassan_message = await self._save_message(
                 text=llm_response['text'],
@@ -90,7 +100,8 @@ class ChatService:
                 metadata={
                     'model_used': llm_response.get('model_used'),
                     'has_web_search': needs_search,
-                    'search_results_count': len(search_results)
+                    'search_results_count': len(search_results),
+                    'has_external_links': llm_response.get('has_external_links', False)
                 }
             )
             
