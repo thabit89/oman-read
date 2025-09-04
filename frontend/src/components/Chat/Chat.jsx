@@ -193,17 +193,6 @@ export const Chat = () => {
                   variant="ghost"
                   size="sm"
                   asChild
-                  className="text-purple-600 hover:bg-purple-50 hover:text-purple-700"
-                >
-                  <a href="/upload" title="رفع صورة">
-                    <Upload className="h-5 w-5" />
-                  </a>
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
                   className="text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
                 >
                   <a href="/knowledge" title="إدارة المصادر">
