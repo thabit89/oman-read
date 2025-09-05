@@ -46,32 +46,36 @@ class ChatService:
             needs_search = self._message_needs_search(message_text)
             search_results = []
             
-            # **تحديد المرحلة التعليمية للطالب**
-            student_level = self._detect_student_level(message_text, conversation_context)
-            curriculum_context = self._get_curriculum_context(message_text, student_level)
+            # **معالجة مُبسطة وسريعة**
             
-            # البحث في قاعدة المعرفة المحلية أولاً
+            # 1. البحث المحلي أولاً (سريع)
             local_knowledge = self._search_local_knowledge_base(message_text)
             
-            # تحديد إذا كان يحتاج بحث خارجي
-            if needs_search and not local_knowledge:
-                logger.info(f"رسالة تحتاج بحث متقدم بـ Tavily: {message_text}")
+            # 2. تحديد نوع المعالجة المطلوبة
+            use_claude = self._should_use_claude_analysis(message_text)
+            needs_search = self._message_needs_search(message_text) and not local_knowledge
+            
+            # 3. معالجة سريعة حسب النوع
+            if local_knowledge:
+                # استخدام المعرفة المحلية (أسرع)
+                search_results = [{
+                    'title': f"معلومات محلية: {local_knowledge['source']}",
+                    'content': local_knowledge['content'],
+                    'source': 'قاعدة المعرفة',
+                    'reliability_score': 0.95
+                }]
+                logger.info("استخدام المعرفة المحلية - استجابة سريعة")
                 
-                # استخدام Tavily للبحث المتقدم
-                tavily_results = await tavily_search_service.search_omani_literature_advanced(message_text)
-                
-                # تحويل نتائج Tavily لصيغة موحدة
+            elif needs_search:
+                # بحث خارجي محدود (حالات نادرة)
+                logger.info("بحث خارجي ضروري...")
+                tavily_results = await tavily_search_service.search_omani_literature_advanced(
+                    message_text, max_results=3  # تقليل النتائج للسرعة
+                )
                 search_results = self._convert_tavily_to_standard_format(tavily_results)
             else:
+                # لا بحث مطلوب (أسرع)
                 search_results = []
-                if local_knowledge:
-                    # تحويل المعرفة المحلية لصيغة search_results
-                    search_results = [{
-                        'title': f"معلومات من قاعدة المعرفة: {local_knowledge['source']}",
-                        'content': local_knowledge['content'],
-                        'source': 'قاعدة المعرفة المحلية',
-                        'reliability_score': local_knowledge.get('reliability', 0.95)
-                    }]
             
             # تحديد إذا كان يحتاج تحليل أدبي متقدم
             needs_advanced_analysis = self._needs_advanced_literary_analysis(message_text)
