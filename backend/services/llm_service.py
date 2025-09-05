@@ -92,7 +92,7 @@ class GhassanLLMService:
             # إعداد الرسالة مع نتائج البحث والسياق والتعليمي والتحقق من الدقة
             enhanced_message = self._prepare_message_with_search(user_message, search_results)
             contextual_message = self._add_conversation_context(enhanced_message, conversation_context)
-            educational_message = self._add_educational_context(contextual_message, curriculum_context)
+            educational_message = self._add_educational_context(contextual_message, "")
             final_message = self._add_advanced_instructions(educational_message)
             
             # إنشاء كائن UserMessage
