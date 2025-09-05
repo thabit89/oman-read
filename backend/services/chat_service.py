@@ -230,15 +230,14 @@ class ChatService:
         return any(keyword in message.lower() for keyword in advanced_keywords)
     
     def _should_use_claude_analysis(self, message: str) -> bool:
-        """تحديد متى نستخدم Claude المباشر"""
-        # استخدم Claude للتحليل الأدبي، النحوي، والبلاغي
-        claude_specific = [
-            'تحليل', 'نقد', 'إعراب', 'بلاغة', 'عروض',
-            'نحو', 'صرف', 'شاعرية', 'أسلوب', 'بنية',
-            'نظرية', 'منهج', 'دراسة أدبية'
+        """تحديد متى نستخدم Claude - مع تقليل الاستخدام للسرعة"""
+        # استخدم Claude فقط للتحليل المعقد حقاً
+        complex_analysis_keywords = [
+            'إعراب', 'تحليل نحوي', 'بلاغة', 'عروض', 
+            'تحليل أدبي متقدم', 'نقد متخصص'
         ]
         
-        return any(keyword in message.lower() for keyword in claude_specific)
+        return any(keyword in message.lower() for keyword in complex_analysis_keywords)
     
     def _format_search_context(self, search_results: List[Dict[str, Any]]) -> str:
         """تنسيق نتائج البحث لـ Claude"""
