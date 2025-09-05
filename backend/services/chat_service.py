@@ -197,16 +197,26 @@ class ChatService:
         )
     
     def _message_needs_search(self, message: str) -> bool:
-        """تحديد إذا كانت الرسالة تحتاج بحث عبر الإنترنت"""
-        search_indicators = [
-            'أخبرني عن', 'معلومات عن', 'من هو', 'من هي', 'ما هو', 'ما هي',
-            'بحث', 'ابحث', 'اعثر على', 'أريد معلومات', 'هل تعرف',
-            'تفاصيل', 'خلفية', 'سيرة', 'تاريخ', 'نشأة', 'ولادة',
-            'أعمال', 'كتب', 'قصائد', 'روايات', 'مؤلفات'
+        """تحديد إذا كانت الرسالة تحتاج بحث خارجي - مع تقليل البحث للسرعة"""
+        
+        # قائمة أضيق للبحث - فقط الحالات التي تحتاج بحث فعلي
+        critical_search_indicators = [
+            'أخبرني عن', 'معلومات عن', 'من هو', 'من هي',
+            'أعمال', 'مؤلفات', 'كتب', 'دواوين'
         ]
         
         message_lower = message.lower()
-        return any(indicator in message_lower for indicator in search_indicators)
+        
+        # تحقق أولاً إذا كانت المعلومات متوفرة محلياً
+        has_local_info = any(name.lower() in message_lower 
+                           for name in EXTRACTED_KNOWLEDGE['omani_literary_figures'])
+        
+        # إذا كانت المعلومات متوفرة محلياً، لا تبحث خارجياً (توفير الوقت)
+        if has_local_info:
+            return False
+            
+        # ابحث خارجياً فقط للحالات الحرجة
+        return any(indicator in message_lower for indicator in critical_search_indicators)
     
     def _needs_advanced_literary_analysis(self, message: str) -> bool:
         """تحديد إذا كانت الرسالة تحتاج تحليل أدبي متقدم"""
