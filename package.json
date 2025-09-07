@@ -1,0 +1,33 @@
+{
+  "name": "ghassan-literary-assistant",
+  "version": "1.0.0",
+  "description": "غسان - المساعد الأدبي العُماني الذكي | مشروع المبادرة القرائية لمدرسة غسان بن عبدالله الخروصي",
+  "main": "backend/server.py",
+  "scripts": {
+    "install": "cd frontend && yarn install",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && python server.py",
+    "dev": "concurrently \"cd frontend && npm start\" \"cd backend && uvicorn server:app --host 0.0.0.0 --port 8001 --reload\"",
+    "deploy": "npm run build && vercel --prod"
+  },
+  "keywords": [
+    "أدب عُماني",
+    "ذكاء اصطناعي", 
+    "تعليم",
+    "أدب عربي",
+    "عُمان",
+    "مساعد ذكي",
+    "claude",
+    "gpt-4o"
+  ],
+  "author": "مدرسة غسان بن عبدالله الخروصي",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/ghassan-literary-assistant.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/ghassan-literary-assistant/issues"
+  },
+  "homepage": "https://ghassan-literary-assistant.vercel.app"
+}
