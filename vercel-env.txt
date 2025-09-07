@@ -1,0 +1,15 @@
+# متغيرات البيئة المطلوبة لـ Vercel
+
+# قاعدة البيانات (ستحتاج MongoDB Atlas مجاني)
+MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/ghassan_db
+
+# اسم قاعدة البيانات
+DB_NAME=ghassan_production
+
+# مفاتيح الذكاء الاصطناعي (موجودة لديك)
+EMERGENT_LLM_KEY=sk-emergent-2FdBb1c5c72594a906
+ANTHROPIC_API_KEY=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
+TAVILY_API_KEY=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
+
+# CORS للإنتاج
+CORS_ORIGINS=https://ghassan-literary-assistant.vercel.app,https://www.ghassan-literary.com
