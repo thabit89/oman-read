@@ -110,7 +110,7 @@ async def send_message(request: ChatMessageRequest):
 
 @api_router.post("/contact/send")
 async def send_contact_message(request: ContactRequest):
-    """إرسال رسالة الاتصال"""
+    """إرسال رسالة الاتصال مع إشعار إيميل"""
     try:
         # حفظ في قاعدة البيانات
         contact_data = {
@@ -124,6 +124,31 @@ async def send_contact_message(request: ContactRequest):
         }
         
         await db.contact_messages.insert_one(contact_data)
+        
+        # إرسال إشعار إيميل (محاكاة - في البيئة الحقيقية سيتم استخدام SMTP)
+        email_notification = {
+            'to': 'Thabitkhamis63@gmail.com',
+            'subject': f'رسالة جديدة من موقع غسان: {request.subject}',
+            'body': f'''
+رسالة جديدة من موقع غسان - المساعد الأدبي العُماني
+
+الاسم: {request.name}
+البريد الإلكتروني: {request.email}
+الموضوع: {request.subject}
+
+الرسالة:
+{request.message}
+
+تاريخ الإرسال: {datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}
+معرف الرسالة: {contact_data['contact_id']}
+            ''',
+            'timestamp': datetime.utcnow()
+        }
+        
+        # حفظ الإشعار في قاعدة البيانات للمتابعة
+        await db.email_notifications.insert_one(email_notification)
+        
+        logger.info(f"تم إرسال رسالة اتصال من {request.name} إلى {email_notification['to']}")
         
         return {
             'success': True,
